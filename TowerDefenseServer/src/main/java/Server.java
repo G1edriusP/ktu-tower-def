@@ -1,47 +1,106 @@
+import java.lang.invoke.SerializedLambda;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
+import java.util.*;
 
+import net.Session;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 public class Server extends WebSocketServer {
+    /**
+     * sessionList holds all currently active sessions (includes sessions that
+     * are not full, i.e., 1 out of 2 are connected).
+     * Main motivation was to keep track and provide easy way to search for
+     * sessions that are not full.
+     */
+    protected List<Session> sessionList;
+
+    /**
+     * sessionMap holds WebSockets, pointing to their assigned session for easy
+     * retrieval.
+     */
+    protected Map<WebSocket, Session> sessionMap;
 
     public Server(InetSocketAddress address) {
         super(address);
+        sessionList = new ArrayList<>();
+        sessionMap = new HashMap<>();
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        conn.send("Welcome to the server!"); //This method sends a message to the new client
-//        broadcast( "new connection: " + handshake.getResourceDescriptor() ); //This method sends a message to all clients connected
-        System.out.println("new connection to " + conn.getRemoteSocketAddress());
+        System.out.println("connection: new: " + conn.getRemoteSocketAddress());
+        synchronized (this) {
+            // Try to find a session that has only 1 connection (aka not full)
+            for (Session session : sessionList) {
+                if (session.count() >= 2)
+                    continue;
+
+                // Add the connection
+                session.add(conn);
+                sessionMap.put(conn, session);
+                // We could also make a notifying mechanism here for when both
+                // players are connected.
+                return;
+            }
+
+            // Else create a new session with 1 connection
+            Session session = new Session(conn);
+            sessionList.add(session);
+            sessionMap.put(conn, session);
+        }
     }
 
     @Override
-    public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
+    public void onClose(WebSocket conn, int code, String reason,
+                        boolean remote) {
+        System.out.println("connection: close: " +
+                conn.getRemoteSocketAddress());
+        synchronized (this) {
+            // Retrieve associated session
+            Session session = sessionMap.get(conn);
+            if (session == null)
+                return; // No idea if this can happen but better safe than sorry
+
+            // Remove associations
+            sessionMap.remove(session.getOther(conn));
+            sessionMap.remove(conn);
+            sessionList.remove(session);
+
+            // Close the connections
+            session.close();
+        }
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
-        broadcast(message);
-    }
+        System.out.println(conn.getRemoteSocketAddress() + ": " + message);
 
-    @Override
-    public void onMessage(WebSocket conn, ByteBuffer message) {
-        System.out.println("received ByteBuffer from "	+ conn.getRemoteSocketAddress());
+        // Forward the message to the other connection
+        Session session = sessionMap.get(conn);
+        if (session == null) {
+            System.out.println("session is null!!");
+            return; // Should never occur...
+        }
+
+        WebSocket other = session.getOther(conn);
+        if (other == null) {
+            return; // Only 1 connection on this session and it's us
+        }
+
+        other.send(message);
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-        System.err.println("an error occurred on connection " + conn.getRemoteSocketAddress()  + ":" + ex);
+        System.err.println("an error occurred on connection " +
+                conn.getRemoteSocketAddress()  + ":" + ex);
     }
 
     @Override
     public void onStart() {
-        System.out.println("server started successfully");
+        System.out.println("server started");
     }
 
     public static void main(String[] args) {

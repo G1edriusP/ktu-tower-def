@@ -1,55 +1,23 @@
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft;
-import org.java_websocket.drafts.Draft_6455;
-import org.java_websocket.handshake.ServerHandshake;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import game.Troop;
+import net.Session;
 
-public class Client extends WebSocketClient {
+public class Client {
+    public static void main(String[] args) throws InterruptedException, URISyntaxException, JsonProcessingException {
+        Troop troop = new Troop();
+        Session.getInstance().register(troop);
+        troop.send();
+        troop.setX(5);
+        troop.send();
 
-    public Client(URI serverUri, Draft draft) {
-        super(serverUri, draft);
-    }
+        Thread.sleep(10000);
 
-    public Client(URI serverURI) {
-        super(serverURI);
-    }
-
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-//        send("Hello, it is me. Mario :)");
-        System.out.println("new connection opened");
-    }
-
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        System.out.println("closed with exit code " + code + " additional info: " + reason);
-    }
-
-    @Override
-    public void onMessage(String message) {
-        System.out.println("received message: " + message);
-    }
-
-    @Override
-    public void onMessage(ByteBuffer message) {
-        System.out.println("received ByteBuffer");
-    }
-
-    @Override
-    public void onError(Exception ex) {
-        System.err.println("an error occurred:" + ex);
-    }
-
-    public static void main(String[] args) throws URISyntaxException, InterruptedException {
-        WebSocketClient client = new Client(new URI("ws://localhost:8887"));
-        client.connectBlocking();
-        client.send("Hello Better");
-
-        WebSocketClient client2 = new Client(new URI("ws://localhost:8887"));
-        client2.connectBlocking();
-        client2.send("Hello John");
+        Troop troop2 = new Troop();
+        Session.getInstance().register(troop2);
+        troop2.send();
+        troop2.setX(3);
+        troop2.send();
     }
 }

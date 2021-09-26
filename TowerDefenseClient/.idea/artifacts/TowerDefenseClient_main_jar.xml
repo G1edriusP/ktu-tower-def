@@ -1,0 +1,17 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="TowerDefenseClient.main:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/TowerDefenseClient_main_jar</output-path>
+    <root id="archive" name="TowerDefenseClient.main.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/main/java/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="TowerDefenseClient.main" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.25/da76ca59f6a57ee3102f8f9bd9cee742973efa8a/slf4j-api-1.7.25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.10.0/4e2c5fa04648ec9772c63e2101c53af6504e624e/jackson-core-2.10.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.java-websocket/Java-WebSocket/1.5.1/382b302303c830a7edb20c9ed61c4ac2cdf7a7a4/Java-WebSocket-1.5.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-simple/1.7.9/f918aa891c5402deb6b4dc82862699bb82602a2e/slf4j-simple-1.7.9.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.10.0/e01cfd93b80d6773b3f757c78e756c9755b47b81/jackson-annotations-2.10.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.10.0/1127c9cf62f2bb3121a3a2a0a1351d251a602117/jackson-databind-2.10.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
