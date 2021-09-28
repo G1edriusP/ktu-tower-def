@@ -28,6 +28,10 @@ public class Session extends WebSocketClient {
      */
     private final Map<UUID, Serverside> objects;
 
+    public Map<UUID, Serverside> getObjects() {
+        return this.objects;
+    }
+
     private Session() throws InterruptedException, URISyntaxException {
         super(new URI("ws://localhost:8887"));
         objects = new HashMap<>();
@@ -43,6 +47,7 @@ public class Session extends WebSocketClient {
 
     /**
      * register registers a new object about which to listen from the Server.
+     *
      * @param object Object to register.
      */
     public void register(Serverside object) throws URISyntaxException,
@@ -57,9 +62,10 @@ public class Session extends WebSocketClient {
 
     /**
      * unregister unregisters the object.
-     *
+     * <p>
      * TODO: deletion is lacking ATM. Deleted objects may be deleted locally but
      * will re-appear the second they are updated by the Server.
+     *
      * @param object Object to unregister.
      */
     public void unregister(Serverside object) {
@@ -89,8 +95,10 @@ public class Session extends WebSocketClient {
                     // Check for a recognizable type
                     switch (node.get("type").asText()) {
                         case "troop":
-                            object = new Troop(uuid);
-                            register(object);
+                            Troop troop = new Troop(uuid);
+                            register(troop);
+//                            group.getChildren().add(troop.getObject());
+                            object = troop;
                             break;
 
                         default:

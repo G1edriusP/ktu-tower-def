@@ -24,25 +24,30 @@ public abstract class Serverside {
 
     /**
      * send sends this Object over to the Server.
+     *
      * @throws URISyntaxException
      * @throws InterruptedException
      * @throws JsonProcessingException
      */
-    public void send() throws URISyntaxException, InterruptedException,
-            JsonProcessingException {
-        Session.getInstance().send(new ObjectMapper().writeValueAsString(this));
+    public void send() {
+        try {
+            Session.getInstance().send(new ObjectMapper().writeValueAsString(this));
+        } catch (URISyntaxException | InterruptedException | JsonProcessingException e) {
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * receive parses the message for us and updates this Object.
-     * FIXME: I'm not actually certain whether it updates, needs testing to
-     * confirm.
-     * @param json
-     * @throws JsonProcessingException
-     */
-    public void receive(String json) throws JsonProcessingException {
-        new ObjectMapper().readValue(json, this.getClass());
-    }
+    abstract public void receive(String json) throws JsonProcessingException;
+//    /**
+//     * receive parses the message for us and updates this Object.
+//     * FIXME: I'm not actually certain whether it updates, needs testing to
+//     * confirm.
+//     * @param json
+//     * @throws JsonProcessingException
+//     */
+//    public void receive(String json) throws JsonProcessingException {
+//        new ObjectMapper().readValue(json, this.getClass());
+//    }
 
     public UUID getUuid() {
         return uuid;
@@ -51,6 +56,7 @@ public abstract class Serverside {
     /**
      * getType retrieves the object type. Needed to identify what kind of object
      * we are sending to a server (or retrieving in that matter).
+     *
      * @return Object type literal.
      */
     abstract public String getType();

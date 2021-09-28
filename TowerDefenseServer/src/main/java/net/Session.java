@@ -21,6 +21,7 @@ public class Session {
 
     /**
      * getOther retrieves other associated connection.
+     *
      * @param socket This connection.
      * @return Other associated connection.
      */
@@ -32,6 +33,7 @@ public class Session {
 
     /**
      * add adds a socket to a Session. If session is full, add is no-op.
+     *
      * @param socket WebSocket to add.
      */
     public void add(WebSocket socket) {
