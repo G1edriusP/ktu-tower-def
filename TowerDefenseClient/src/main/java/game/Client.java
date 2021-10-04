@@ -4,8 +4,7 @@ import java.net.URISyntaxException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 
-import game.entity.Soldier;
-import game.entity.Tower;
+import game.entity.*;
 import game.entity.blue.BlueArcher;
 import game.factory.AbstractSoldierFactory;
 import game.factory.Creator;
@@ -31,14 +30,15 @@ import javafx.stage.Stage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public class Client extends Application {
     final Group group = new Group();
     final Scene scene = new Scene(group, 1200, 800);
     private Tower tower;
-    private static final int KEYBOARD_MOVEMENT_DELTA = 5;
-    private static final Duration TRANSLATE_DURATION = Duration.seconds(0.25);
+    private static final int KEYBOARD_MOVEMENT_DELTA = 10;
+    private static final Duration TRANSLATE_DURATION = Duration.seconds(0.20);
 
     public static void main(String[] args) {
         launch(args);
@@ -82,13 +82,20 @@ public class Client extends Application {
         Creator creator = new TowerCreator();
         tower = creator.createTower();
         tower.register();
+        if(Session.getInstance().isRed()) {
+            tower.setX(50);
+            tower.setY(600);
+        } else {
+            tower.setX(1000);
+            tower.setY(50);
+        }
         tower.send();
 
         final ImageView img = tower.getImageView();
         final TranslateTransition transition = createTranslateTransition(img);
 
-        moveCircleOnKeyPress(scene, img);
-        moveCircleOnMousePress(scene, img, transition);
+//        moveCircleOnKeyPress(scene, img);
+//        moveCircleOnMousePress(scene, img, transition);
 
         this.addSoldierButtons(group);
     }
@@ -103,7 +110,7 @@ public class Client extends Application {
         ImageView barbarianButtonView = new ImageView("images/barbarian.png");
         ImageView ghostButtonView = new ImageView("images/ghost.png");
         ImageView archerButtonView = new ImageView("images/archer.png");
-        ImageView zombieButtonView = new ImageView("images/zombie.png");
+        ImageView skeletonButtonView = new ImageView("images/skeleton.png");
 
         barbarianButtonView.setX(600);
         barbarianButtonView.setY(650);
@@ -111,8 +118,8 @@ public class Client extends Application {
         ghostButtonView.setY(650);
         archerButtonView.setX(840);
         archerButtonView.setY(650);
-        zombieButtonView.setX(960);
-        zombieButtonView.setY(650);
+        skeletonButtonView.setX(960);
+        skeletonButtonView.setY(650);
 
         barbarianButtonView.setFitHeight(100);
         barbarianButtonView.setFitWidth(100);
@@ -120,22 +127,50 @@ public class Client extends Application {
         ghostButtonView.setFitWidth(100);
         archerButtonView.setFitHeight(100);
         archerButtonView.setFitWidth(100);
-        zombieButtonView.setFitHeight(100);
-        zombieButtonView.setFitWidth(100);
+        skeletonButtonView.setFitHeight(100);
+        skeletonButtonView.setFitWidth(100);
 
-        barbarianButtonView.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (!event.isControlDown()) {
-                    System.out.println("Barbaras");
-                }
-            }
-        });;
+        barbarianButtonView.setOnMouseClicked(button -> {
+            Barbarian barbarian = tower.getAbstractSoldierFactory().createBarbarian();
+            addSoldierToMap(barbarianButtonView, barbarian);
+        });
+
+        skeletonButtonView.setOnMouseClicked(button -> {
+            Skeleton skeleton = tower.getAbstractSoldierFactory().createSkeleton();
+            addSoldierToMap(skeletonButtonView, skeleton);
+        });
+
+        ghostButtonView.setOnMouseClicked(button -> {
+            Ghost ghost = tower.getAbstractSoldierFactory().createGhost();
+            addSoldierToMap(ghostButtonView, ghost);
+        });
+
+        archerButtonView.setOnMouseClicked(button -> {
+            Archer archer = tower.getAbstractSoldierFactory().createArcher();
+            addSoldierToMap(archerButtonView, archer);
+        });
 
         group.getChildren().add(barbarianButtonView);
         group.getChildren().add(ghostButtonView);
         group.getChildren().add(archerButtonView);
-        group.getChildren().add(zombieButtonView);
+        group.getChildren().add(skeletonButtonView);
+    }
+
+    public void addSoldierToMap(ImageView button, Soldier soldier) {
+        Random random = new Random();
+        try {
+            if(Session.getInstance().isRed()) {
+                soldier.setY(random.nextInt(150) + 500);
+                soldier.setX(random.nextInt(150) + 100);
+            } else {
+                soldier.setY(random.nextInt(150) + 100);
+                soldier.setX(random.nextInt(150) + 900);
+            }
+            soldier.register();
+        } catch (URISyntaxException | InterruptedException | JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        soldier.send();
     }
 
     public void addToGroup(Node object) {
@@ -144,14 +179,11 @@ public class Client extends Application {
 
     private TranslateTransition createTranslateTransition(final ImageView img) {
         final TranslateTransition transition = new TranslateTransition(TRANSLATE_DURATION, img);
-        transition.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                img.setX(img.getTranslateX() + img.getX());
-                img.setY(img.getTranslateY() + img.getY());
-                img.setTranslateX(0);
-                img.setTranslateY(0);
-            }
+        transition.setOnFinished(t -> {
+            img.setX(img.getTranslateX() + img.getX());
+            img.setY(img.getTranslateY() + img.getY());
+            img.setTranslateX(0);
+            img.setTranslateY(0);
         });
         return transition;
     }

@@ -7,5 +7,7 @@ import game.net.ServersideImage;
 abstract public class Soldier extends ServersideImage {
     protected Soldier(UUID uuid, ImageView imageView) {
         super(uuid, imageView);
+        imageView.setFitHeight(60);
+        imageView.setFitWidth(60);
     }
 }
