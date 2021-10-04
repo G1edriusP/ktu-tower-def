@@ -9,7 +9,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import game.Troop;
+import game.Soldier;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -95,9 +95,8 @@ public class Session extends WebSocketClient {
                     // Check for a recognizable type
                     switch (node.get("type").asText()) {
                         case "troop":
-                            Troop troop = new Troop(uuid);
+                            Soldier troop = new Soldier(uuid);
                             register(troop);
-//                            group.getChildren().add(troop.getObject());
                             object = troop;
                             break;
 

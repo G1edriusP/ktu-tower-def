@@ -37,6 +37,10 @@ public abstract class Serverside {
         }
     }
 
+    public void register() throws URISyntaxException, InterruptedException, JsonProcessingException {
+        Session.getInstance().register(this);
+    }
+
     abstract public void receive(String json) throws JsonProcessingException;
 //    /**
 //     * receive parses the message for us and updates this Object.
