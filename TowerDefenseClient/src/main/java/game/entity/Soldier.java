@@ -1,10 +1,10 @@
-package game;
+package game.entity;
 
 import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.image.ImageView;
-import net.ServersideImage;
+import game.net.ServersideImage;
 
 public class Soldier extends ServersideImage {
     private double x;
@@ -19,6 +19,8 @@ public class Soldier extends ServersideImage {
             uuid,
             new ImageView("ethan.jpeg")
         );
+        this.imageView.setFitWidth(200);
+        this.imageView.setFitHeight(200);
     }
 
     @Override

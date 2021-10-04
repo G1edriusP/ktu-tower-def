@@ -1,4 +1,4 @@
-package net;
+package game.net;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javafx.scene.Group;

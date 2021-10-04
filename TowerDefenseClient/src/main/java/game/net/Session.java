@@ -1,4 +1,4 @@
-package net;
+package game.net;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -9,7 +9,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import game.Soldier;
+import game.entity.Soldier;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 

@@ -1,4 +1,4 @@
-package net;
+package game.net;
 
 import java.net.URISyntaxException;
 import java.util.UUID;

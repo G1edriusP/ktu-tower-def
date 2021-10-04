@@ -1,7 +1,10 @@
-import java.net.URISyntaxException;
+package game;
 
+import java.net.URISyntaxException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import game.Soldier;
+import java.io.IOException;
+
+import game.entity.Soldier;
 import javafx.animation.AnimationTimer;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
@@ -13,9 +16,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
-import net.Serverside;
-import net.ServersideImage;
-import net.Session;
+import game.net.ServersideImage;
+import javafx.scene.image.Image;
+import javafx.scene.shape.Circle;
+import game.net.Serverside;
+import game.net.Session;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -26,7 +31,7 @@ import java.util.UUID;
 
 public class Client extends Application {
     final Group group = new Group();
-    final Scene scene = new Scene(group, 800, 600);
+    final Scene scene = new Scene(group, 1200, 800);
     private Soldier troop1;
     private static final int KEYBOARD_MOVEMENT_DELTA = 5;
     private static final Duration TRANSLATE_DURATION = Duration.seconds(0.25);
@@ -64,6 +69,8 @@ public class Client extends Application {
             }
         }.start();
 
+        this.addSoldierButtons(group);
+
         stage.setScene(scene);
         stage.setTitle("Tower Defense | 505");
         stage.show();
@@ -82,6 +89,53 @@ public class Client extends Application {
         soldier.setY(y);
         soldier.send();
         return soldier;
+    }
+
+    public void addSoldierButtons(Group group) throws IOException {
+        Image barbarian = new Image("/images/barbarian.png");
+        ImageView barbarianButtonView = new ImageView(barbarian);
+        Image ghost = new Image("/images/ghost.png");
+        ImageView ghostButtonView = new ImageView(ghost);
+        Image archer = new Image("/images/archer.png");
+        ImageView archerButtonView = new ImageView(archer);
+        Image zombie = new Image("/images/zombie.png");
+        ImageView zombieButtonView = new ImageView(zombie);
+
+        barbarianButtonView.setX(600);
+        barbarianButtonView.setY(650);
+        ghostButtonView.setX(720);
+        ghostButtonView.setY(650);
+        archerButtonView.setX(840);
+        archerButtonView.setY(650);
+        zombieButtonView.setX(960);
+        zombieButtonView.setY(650);
+
+        barbarianButtonView.setFitHeight(100);
+        barbarianButtonView.setFitWidth(100);
+        ghostButtonView.setFitHeight(100);
+        ghostButtonView.setFitWidth(100);
+        archerButtonView.setFitHeight(100);
+        archerButtonView.setFitWidth(100);
+        zombieButtonView.setFitHeight(100);
+        zombieButtonView.setFitWidth(100);
+
+        barbarianButtonView.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (!event.isControlDown()) {
+                    System.out.println("Barbaras");
+                }
+            }
+        });;
+
+        group.getChildren().add(barbarianButtonView);
+        group.getChildren().add(ghostButtonView);
+        group.getChildren().add(archerButtonView);
+        group.getChildren().add(zombieButtonView);
+    }
+
+    public void addToGroup(Node object) {
+        group.getChildren().add(object);
     }
 
     private TranslateTransition createTranslateTransition(final ImageView img) {
