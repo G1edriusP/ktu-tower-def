@@ -10,6 +10,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import game.entity.Soldier;
+import game.entity.blue.*;
+import game.entity.red.*;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.scene.image.ImageView;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -21,6 +27,10 @@ public class Session extends WebSocketClient {
      * instance is a single instance of the Session.
      */
     private static Session instance = null;
+
+    private boolean red = false;
+
+    private boolean started;
 
     /**
      * objects holds all the objects that are shared with a Server by their
@@ -35,6 +45,7 @@ public class Session extends WebSocketClient {
     private Session() throws InterruptedException, URISyntaxException {
         super(new URI("ws://localhost:8887"));
         objects = new HashMap<>();
+        started = false;
         connectBlocking();
     }
 
@@ -43,6 +54,14 @@ public class Session extends WebSocketClient {
         if (instance == null)
             instance = new Session();
         return instance;
+    }
+
+    public boolean isRed() {
+        return this.red;
+    }
+
+    public boolean isBlue() {
+        return !this.red;
     }
 
     /**
@@ -81,8 +100,22 @@ public class Session extends WebSocketClient {
     public void onMessage(String message) {
         try {
             // Try extracting UUID from the message.
-            ObjectNode node = new ObjectMapper().readValue(message,
-                    ObjectNode.class);
+            ObjectNode node = new ObjectMapper().readValue(message, ObjectNode.class);
+
+            if (node.has("action")) {
+                switch (node.get("action").asText("")) {
+                case "sessionStart":
+                    this.red = node.get("red").asBoolean();
+                    this.started = true;
+                    System.out.println("start");
+                    break;
+                }
+                return;
+            }
+
+            if (!node.has("uuid")) {
+                return;
+            }
             UUID uuid = UUID.fromString(node.get("uuid").asText());
 
             synchronized (this) {
@@ -94,10 +127,36 @@ public class Session extends WebSocketClient {
 
                     // Check for a recognizable type
                     switch (node.get("type").asText()) {
-                        case "troop":
-                            Soldier troop = new Soldier(uuid);
-                            register(troop);
-                            object = troop;
+                        case "blue-ghost":
+                            object = new BlueGhost(uuid);
+                            break;
+                        case "blue-archer":
+                            object = new BlueArcher(uuid);
+                            break;
+                        case "blue-skeleton":
+                            object = new BlueSkeleton(uuid);
+                            break;
+                        case "blue-barbarian":
+                            object = new BlueBarbarian(uuid);
+                            break;
+                        case "blue-tower":
+                            object = new BlueTower(uuid);
+                            break;
+
+                        case "red-ghost":
+                            object = new RedGhost(uuid);
+                            break;
+                        case "red-archer":
+                            object = new RedArcher(uuid);
+                            break;
+                        case "red-skeleton":
+                            object = new RedSkeleton(uuid);
+                            break;
+                        case "red-barbarian":
+                            object = new RedBarbarian(uuid);
+                            break;
+                        case "red-tower":
+                            object = new RedTower(uuid);
                             break;
 
                         default:
@@ -105,6 +164,7 @@ public class Session extends WebSocketClient {
                                     uuid);
                             return;
                     }
+                    object.register();
                 }
                 // Update the object
                 object.receive(message);
@@ -124,6 +184,10 @@ public class Session extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         System.out.println("an error occurred: " + ex);
-        System.exit(1);
+        // System.exit(1);
+    }
+
+    public boolean isStarted() {
+        return this.started;
     }
 }

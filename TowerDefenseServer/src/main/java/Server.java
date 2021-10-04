@@ -40,12 +40,14 @@ public class Server extends WebSocketServer {
                 // Add the connection
                 session.add(conn);
                 sessionMap.put(conn, session);
-                // We could also make a notifying mechanism here for when both
-                // players are connected.
+
+                conn.send("{\"action\":\"sessionStart\",\"red\":true}");
+                session.getOther(conn).send("{\"action\":\"sessionStart\",\"red\":false}");
                 return;
             }
 
             // Else create a new session with 1 connection
+            System.out.println("red");
             Session session = new Session(conn);
             sessionList.add(session);
             sessionMap.put(conn, session);

@@ -14,7 +14,7 @@ public abstract class Serverside {
      */
     protected UUID uuid;
 
-    public Serverside() {
+    protected Serverside() {
         this(UUID.randomUUID());
     }
 

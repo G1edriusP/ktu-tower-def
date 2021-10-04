@@ -5,6 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 
 import game.entity.Soldier;
+import game.entity.Tower;
+import game.entity.blue.BlueArcher;
+import game.factory.AbstractSoldierFactory;
+import game.factory.Creator;
+import game.factory.TowerCreator;
 import javafx.animation.AnimationTimer;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
@@ -18,7 +23,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 import game.net.ServersideImage;
 import javafx.scene.image.Image;
-import javafx.scene.shape.Circle;
 import game.net.Serverside;
 import game.net.Session;
 
@@ -32,7 +36,7 @@ import java.util.UUID;
 public class Client extends Application {
     final Group group = new Group();
     final Scene scene = new Scene(group, 1200, 800);
-    private Soldier troop1;
+    private Tower tower;
     private static final int KEYBOARD_MOVEMENT_DELTA = 5;
     private static final Duration TRANSLATE_DURATION = Duration.seconds(0.25);
 
@@ -42,20 +46,19 @@ public class Client extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        troop1 = createTroop(50, 50);
-
-        final ImageView img = troop1.getImageView();
-        final TranslateTransition transition = createTranslateTransition(img);
-
-        moveCircleOnKeyPress(scene, img);
-        moveCircleOnMousePress(scene, img, transition);
-
+        final boolean[] once = {true};
         Map<UUID, ServersideImage> drawnObjects = new HashMap<>();
+        Session session = Session.getInstance();
         new AnimationTimer() {
             @Override
             public void handle(long l) {
                 try {
-                    for (Map.Entry<UUID, Serverside> entry : Session.getInstance().getObjects().entrySet()) {
+                    if (once[0] && session.isStarted()) {
+                        once[0] = false;
+                            gameStart();
+                    }
+
+                    for (Map.Entry<UUID, Serverside> entry : session.getObjects().entrySet()) {
                         if(drawnObjects.containsKey(entry.getKey())) {
                             continue;
                         }
@@ -63,43 +66,44 @@ public class Client extends Application {
                         serversideImage.addToGroup(group);
                         drawnObjects.put(entry.getKey(), serversideImage);
                     }
-                } catch (URISyntaxException | InterruptedException e) {
+
+                } catch (URISyntaxException | InterruptedException | IOException e) {
                     e.printStackTrace();
                 }
             }
         }.start();
-
-        this.addSoldierButtons(group);
 
         stage.setScene(scene);
         stage.setTitle("Tower Defense | 505");
         stage.show();
     }
 
-    private void updateTroopPosition(double x, double y, ImageView img) {
-        troop1.setX(x);
-        troop1.setY(y);
-        troop1.send();
+    private void gameStart() throws URISyntaxException, InterruptedException, IOException {
+        Creator creator = new TowerCreator();
+        tower = creator.createTower();
+        tower.register();
+        tower.send();
+
+        final ImageView img = tower.getImageView();
+        final TranslateTransition transition = createTranslateTransition(img);
+
+        moveCircleOnKeyPress(scene, img);
+        moveCircleOnMousePress(scene, img, transition);
+
+        this.addSoldierButtons(group);
     }
 
-    public Soldier createTroop(double x, double y) throws URISyntaxException, InterruptedException, JsonProcessingException {
-        Soldier soldier = new Soldier();
-        soldier.register();
-        soldier.setX(x);
-        soldier.setY(y);
-        soldier.send();
-        return soldier;
+    private void updateTroopPosition(double x, double y, ImageView img) {
+        tower.setX(x);
+        tower.setY(y);
+        tower.send();
     }
 
     public void addSoldierButtons(Group group) throws IOException {
-        Image barbarian = new Image("/images/barbarian.png");
-        ImageView barbarianButtonView = new ImageView(barbarian);
-        Image ghost = new Image("/images/ghost.png");
-        ImageView ghostButtonView = new ImageView(ghost);
-        Image archer = new Image("/images/archer.png");
-        ImageView archerButtonView = new ImageView(archer);
-        Image zombie = new Image("/images/zombie.png");
-        ImageView zombieButtonView = new ImageView(zombie);
+        ImageView barbarianButtonView = new ImageView("images/barbarian.png");
+        ImageView ghostButtonView = new ImageView("images/ghost.png");
+        ImageView archerButtonView = new ImageView("images/archer.png");
+        ImageView zombieButtonView = new ImageView("images/zombie.png");
 
         barbarianButtonView.setX(600);
         barbarianButtonView.setY(650);
