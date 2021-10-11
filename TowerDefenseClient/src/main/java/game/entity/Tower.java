@@ -10,8 +10,8 @@ import java.util.UUID;
 public abstract class Tower extends Image {
     protected Tower(UUID uuid, ImageView imageView) {
         super(uuid, imageView);
-        imageView.setFitWidth(150);
-        imageView.setFitHeight(150);
+        imageView.setFitWidth(64);
+        imageView.setFitHeight(64);
     }
 
     @JsonIgnore
