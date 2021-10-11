@@ -28,17 +28,15 @@ import game.net.Session;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class Client extends Application {
+    private Stage stage;
     final Group group = new Group();
-    final Scene scene = new Scene(group, 1200, 800);
+    final Scene scene = new Scene(group, 1152, 768);
     private Tower tower;
-    private static final int KEYBOARD_MOVEMENT_DELTA = 10;
-    private static final Duration TRANSLATE_DURATION = Duration.seconds(0.20);
+//    private static final int KEYBOARD_MOVEMENT_DELTA = 10;
+//    private static final Duration TRANSLATE_DURATION = Duration.seconds(0.20);
 
     public static void main(String[] args) {
         launch(args);
@@ -73,8 +71,8 @@ public class Client extends Application {
             }
         }.start();
 
+        this.stage = stage;
         stage.setScene(scene);
-        stage.setTitle("Tower Defense | 505");
         stage.show();
     }
 
@@ -83,20 +81,28 @@ public class Client extends Application {
         tower = creator.createTower();
         tower.register();
         if(Session.getInstance().isRed()) {
-            tower.setX(50);
-            tower.setY(600);
+            tower.setX(64);
+            tower.setY(10 * 64);
         } else {
-            tower.setX(1000);
-            tower.setY(50);
+            tower.setX(16 * 64);
+            tower.setY(64);
         }
         tower.send();
 
+        // Title change
+        if(Session.getInstance().isRed()) {
+            this.stage.setTitle("Tower Defense | Red opponent");
+        } else {
+            this.stage.setTitle("Tower Defense | Blue opponent");
+        }
+
         final ImageView img = tower.getImageView();
-        final TranslateTransition transition = createTranslateTransition(img);
+//        final TranslateTransition transition = createTranslateTransition(img);
 
 //        moveCircleOnKeyPress(scene, img);
 //        moveCircleOnMousePress(scene, img, transition);
 
+        this.generateDummyMap();
         this.addSoldierButtons(group);
     }
 
@@ -177,51 +183,94 @@ public class Client extends Application {
         group.getChildren().add(object);
     }
 
-    private TranslateTransition createTranslateTransition(final ImageView img) {
-        final TranslateTransition transition = new TranslateTransition(TRANSLATE_DURATION, img);
-        transition.setOnFinished(t -> {
-            img.setX(img.getTranslateX() + img.getX());
-            img.setY(img.getTranslateY() + img.getY());
-            img.setTranslateX(0);
-            img.setTranslateY(0);
-        });
-        return transition;
+//    private TranslateTransition createTranslateTransition(final ImageView img) {
+//        final TranslateTransition transition = new TranslateTransition(TRANSLATE_DURATION, img);
+//        transition.setOnFinished(t -> {
+//            img.setX(img.getTranslateX() + img.getX());
+//            img.setY(img.getTranslateY() + img.getY());
+//            img.setTranslateX(0);
+//            img.setTranslateY(0);
+//        });
+//        return transition;
+//    }
+
+    private void generateDummyMap() {
+        int[][] map = {
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1},
+                {1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
+                {1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
+                {1, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1},
+                {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
+                {1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+        };
+
+        int x = 0;
+        int y = 0;
+        for (int[] line: map) {
+            for (int tile: line) {
+                addTile(tile, x, y);
+                x += 64;
+            }
+            x = 0;
+            y += 64;
+        }
     }
 
-    private void moveCircleOnKeyPress(Scene scene, final ImageView img) {
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                switch (event.getCode()) {
-                    case UP, W:
-                        updateTroopPosition(img.getX(), img.getY() - KEYBOARD_MOVEMENT_DELTA, img);
-                        break;
-                    case RIGHT, D:
-                        updateTroopPosition(img.getX() + KEYBOARD_MOVEMENT_DELTA, img.getY(), img);
-                        break;
-                    case DOWN, S:
-                        updateTroopPosition(img.getX(), img.getY() + KEYBOARD_MOVEMENT_DELTA, img);
-                        break;
-                    case LEFT, A:
-                        updateTroopPosition(img.getX() - KEYBOARD_MOVEMENT_DELTA, img.getY(), img);
-                        break;
-                }
-            }
-        });
+    private void addTile(int type, int x, int y) {
+        ImageView tile = new ImageView("tiles/grass.jpg");
+        if (type == 2) {
+            tile = new ImageView("tiles/dirt.jpg");
+        }
+
+        tile.setX(x);
+        tile.setY(y);
+
+        tile.setFitHeight(64);
+        tile.setFitWidth(64);
+
+        group.getChildren().add(tile);
     }
 
-    private void moveCircleOnMousePress(Scene scene, final ImageView img, final TranslateTransition transition) {
-        scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (!event.isControlDown()) {
-                    updateTroopPosition(event.getSceneX(), event.getSceneY(), img);
-                } else {
-                    transition.setToX(event.getSceneX() - img.getX());
-                    transition.setToY(event.getSceneY() - img.getY());
-                    transition.playFromStart();
-                }
-            }
-        });
-    }
+//    private void moveCircleOnKeyPress(Scene scene, final ImageView img) {
+//        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+//            @Override
+//            public void handle(KeyEvent event) {
+//                switch (event.getCode()) {
+//                    case UP, W:
+//                        updateTroopPosition(img.getX(), img.getY() - KEYBOARD_MOVEMENT_DELTA, img);
+//                        break;
+//                    case RIGHT, D:
+//                        updateTroopPosition(img.getX() + KEYBOARD_MOVEMENT_DELTA, img.getY(), img);
+//                        break;
+//                    case DOWN, S:
+//                        updateTroopPosition(img.getX(), img.getY() + KEYBOARD_MOVEMENT_DELTA, img);
+//                        break;
+//                    case LEFT, A:
+//                        updateTroopPosition(img.getX() - KEYBOARD_MOVEMENT_DELTA, img.getY(), img);
+//                        break;
+//                }
+//            }
+//        });
+//    }
+
+//    private void moveCircleOnMousePress(Scene scene, final ImageView img, final TranslateTransition transition) {
+//        scene.setOnMousePressed(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                if (!event.isControlDown()) {
+//                    updateTroopPosition(event.getSceneX(), event.getSceneY(), img);
+//                } else {
+//                    transition.setToX(event.getSceneX() - img.getX());
+//                    transition.setToY(event.getSceneY() - img.getY());
+//                    transition.playFromStart();
+//                }
+//            }
+//        });
+//    }
 }
