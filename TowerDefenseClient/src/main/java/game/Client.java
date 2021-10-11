@@ -5,13 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 
 import game.entity.*;
-import game.entity.blue.BlueArcher;
-import game.factory.AbstractSoldierFactory;
 import game.factory.Creator;
 import game.factory.TowerCreator;
+import game.net.IObserver;
 import javafx.animation.AnimationTimer;
 import javafx.animation.TranslateTransition;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -20,9 +18,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
-import game.net.ServersideImage;
-import javafx.scene.image.Image;
-import game.net.Serverside;
+import game.net.Image;
 import game.net.Session;
 
 import javafx.application.Application;
@@ -45,9 +41,15 @@ public class Client extends Application {
     }
 
     @Override
+    public void stop() throws Exception {
+        super.stop();
+        System.exit(0);
+    }
+
+    @Override
     public void start(Stage stage) throws Exception {
         final boolean[] once = {true};
-        Map<UUID, ServersideImage> drawnObjects = new HashMap<>();
+        Map<UUID, Image> drawnObjects = new HashMap<>();
         Session session = Session.getInstance();
         new AnimationTimer() {
             @Override
@@ -58,11 +60,11 @@ public class Client extends Application {
                             gameStart();
                     }
 
-                    for (Map.Entry<UUID, Serverside> entry : session.getObjects().entrySet()) {
+                    for (Map.Entry<UUID, IObserver> entry : session.getObjects().entrySet()) {
                         if(drawnObjects.containsKey(entry.getKey())) {
                             continue;
                         }
-                        ServersideImage serversideImage = (ServersideImage) entry.getValue();
+                        Image serversideImage = (Image) entry.getValue();
                         serversideImage.addToGroup(group);
                         drawnObjects.put(entry.getKey(), serversideImage);
                     }

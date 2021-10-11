@@ -9,13 +9,8 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import game.entity.Soldier;
 import game.entity.blue.*;
 import game.entity.red.*;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableBooleanValue;
-import javafx.scene.image.ImageView;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -36,9 +31,9 @@ public class Session extends WebSocketClient {
      * objects holds all the objects that are shared with a Server by their
      * UUID.
      */
-    private final Map<UUID, Serverside> objects;
+    private final Map<UUID, IObserver> objects;
 
-    public Map<UUID, Serverside> getObjects() {
+    public Map<UUID, IObserver> getObjects() {
         return this.objects;
     }
 
@@ -69,14 +64,14 @@ public class Session extends WebSocketClient {
      *
      * @param object Object to register.
      */
-    public void register(Serverside object) throws URISyntaxException,
+    public void register(IObserver object) throws URISyntaxException,
             InterruptedException, JsonProcessingException {
-        if (objects.containsKey(object.uuid)) {
-            System.out.println("trying to register existing: " + object.uuid);
+        if (objects.containsKey(object.getUUID())) {
+            System.out.println("trying to register existing: " + object.getUUID());
             return;
         }
-        objects.put(object.uuid, object);
-        System.out.println("register: " + object.uuid);
+        objects.put(object.getUUID(), object);
+        System.out.println("register: " + object.getUUID());
     }
 
     /**
@@ -87,8 +82,8 @@ public class Session extends WebSocketClient {
      *
      * @param object Object to unregister.
      */
-    public void unregister(Serverside object) {
-        objects.remove(object.uuid);
+    public void unregister(IObserver object) {
+        objects.remove(object.getUUID());
     }
 
     @Override
@@ -119,7 +114,7 @@ public class Session extends WebSocketClient {
             UUID uuid = UUID.fromString(node.get("uuid").asText());
 
             synchronized (this) {
-                Serverside object = this.objects.get(uuid);
+                IObserver object = this.objects.get(uuid);
                 if (object == null) {
                     // New object
                     // Or a deleted one.. and we are re-creating it..

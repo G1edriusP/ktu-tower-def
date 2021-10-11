@@ -3,34 +3,52 @@ package game.net;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import game.entity.Soldier;
 import javafx.scene.Group;
 import javafx.scene.image.ImageView;
 
+import java.net.URISyntaxException;
 import java.util.UUID;
 
-abstract public class ServersideImage extends Serverside{
+abstract public class Image implements IObserver {
     private double x;
     private double y;
+
+    /**
+     * uuid is used to safely identify each Object uniquely.
+     */
+    protected UUID uuid;
 
     @JsonIgnore
     protected ImageView imageView;
 
-    protected ServersideImage() {
+    protected Image() {
         this(UUID.randomUUID(), null);
     }
 
-    protected ServersideImage(UUID uuid) {
+    protected Image(UUID uuid) {
         this(uuid, null);
     }
 
-    protected ServersideImage(ImageView imageView) {
+    protected Image(ImageView imageView) {
         this(UUID.randomUUID(), imageView);
     }
 
-    public ServersideImage(UUID uuid, ImageView imageView) {
-        super(uuid);
-        this.setImageView(imageView);
+    public void send()  {
+        try {
+            Session.getInstance().send(new ObjectMapper().writeValueAsString(this));
+        } catch (URISyntaxException | InterruptedException | JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void register() throws URISyntaxException, InterruptedException, JsonProcessingException{
+        Session.getInstance().register(this);
+    }
+
+
+    public Image(UUID uuid, ImageView imageView) {
+        this.uuid = uuid;
+        this.imageView = imageView;
     }
 
     public void setImageView(ImageView imageView) {
@@ -47,7 +65,7 @@ abstract public class ServersideImage extends Serverside{
 
     @Override
     public void receive(String json) throws JsonProcessingException {
-        ServersideImage img = new ObjectMapper().readValue(json, this.getClass());
+        Image img = new ObjectMapper().readValue(json, this.getClass());
         this.setX(img.getX());
         this.setY(img.getY());
     }
@@ -68,5 +86,9 @@ abstract public class ServersideImage extends Serverside{
     public void setY(double y) {
         this.y = y;
         this.imageView.setY(y);
+    }
+
+    public UUID getUUID() {
+        return this.uuid;
     }
 }
