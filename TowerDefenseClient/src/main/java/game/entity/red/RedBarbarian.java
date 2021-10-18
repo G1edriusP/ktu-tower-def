@@ -1,6 +1,7 @@
 package game.entity.red;
 
 import game.entity.Barbarian;
+import game.singleton.ImageStore;
 import javafx.scene.image.ImageView;
 
 import java.util.UUID;
@@ -10,7 +11,7 @@ public class RedBarbarian extends Barbarian {
         this(UUID.randomUUID());
     }
     public RedBarbarian(UUID uuid) {
-        super(uuid, new ImageView("red/barbarian.png"));
+        super(uuid, new ImageView(ImageStore.getInstance().getImage("red/barbarian.png")));
     }
 
     @Override

@@ -3,6 +3,7 @@ package game.entity.blue;
 import game.entity.Tower;
 import game.factory.AbstractSoldierFactory;
 import game.factory.BlueSoldierFactory;
+import game.singleton.ImageStore;
 import javafx.scene.image.ImageView;
 
 import java.util.UUID;
@@ -13,7 +14,7 @@ public class BlueTower extends Tower {
     }
 
     public BlueTower(UUID uuid) {
-        super(uuid, new ImageView("blue/tower.png"));
+        super(uuid, new ImageView(ImageStore.getInstance().getImage("blue/tower.png")));
     }
 
     @Override

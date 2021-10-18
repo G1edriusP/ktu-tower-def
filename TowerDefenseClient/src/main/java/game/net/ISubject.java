@@ -3,12 +3,9 @@ package game.net;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public interface IObserver {
+public interface ISubject {
     /**
      * send sends this Object over to the Server.
      */

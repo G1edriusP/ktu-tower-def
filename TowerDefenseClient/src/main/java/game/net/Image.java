@@ -1,6 +1,7 @@
 package game.net;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.scene.Group;
@@ -9,7 +10,8 @@ import javafx.scene.image.ImageView;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-abstract public class Image implements IObserver {
+@JsonIgnoreProperties(ignoreUnknown = true)
+abstract public class Image implements ISubject {
     private double x;
     private double y;
 
@@ -44,7 +46,6 @@ abstract public class Image implements IObserver {
     public void register() throws URISyntaxException, InterruptedException, JsonProcessingException{
         Session.getInstance().register(this);
     }
-
 
     public Image(UUID uuid, ImageView imageView) {
         this.uuid = uuid;
@@ -86,6 +87,10 @@ abstract public class Image implements IObserver {
     public void setY(double y) {
         this.y = y;
         this.imageView.setY(y);
+    }
+
+    public void setUUID(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public UUID getUUID() {

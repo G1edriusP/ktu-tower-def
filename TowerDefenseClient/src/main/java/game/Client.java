@@ -4,20 +4,18 @@ import java.net.URISyntaxException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 
+import game.builder.LevelBuilder;
 import game.entity.*;
 import game.factory.Creator;
 import game.factory.TowerCreator;
-import game.net.IObserver;
+import game.level.Level;
+import game.net.ISubject;
+import game.prototype.Tile;
 import javafx.animation.AnimationTimer;
-import javafx.animation.TranslateTransition;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.util.Duration;
 import game.net.Image;
 import game.net.Session;
 
@@ -28,6 +26,7 @@ import java.util.*;
 
 public class Client extends Application {
     private Stage stage;
+    private Level level;
     final Group group = new Group();
     final Scene scene = new Scene(group, 1152, 768);
     private Tower tower;
@@ -58,7 +57,7 @@ public class Client extends Application {
                             gameStart();
                     }
 
-                    for (Map.Entry<UUID, IObserver> entry : session.getObjects().entrySet()) {
+                    for (Map.Entry<UUID, ISubject> entry : session.getObjects().entrySet()) {
                         if(drawnObjects.containsKey(entry.getKey())) {
                             continue;
                         }
@@ -79,6 +78,11 @@ public class Client extends Application {
     }
 
     private void gameStart() throws URISyntaxException, InterruptedException, IOException {
+        level = new LevelBuilder().newSavannah().level1();
+        for (Tile tile: level.getTiles()) {
+            addToGroup(tile.getImageView());
+        }
+
         Creator creator = new TowerCreator();
         tower = creator.createTower();
         tower.register();
@@ -99,12 +103,6 @@ public class Client extends Application {
         }
 
         final ImageView img = tower.getImageView();
-//        final TranslateTransition transition = createTranslateTransition(img);
-
-//        moveCircleOnKeyPress(scene, img);
-//        moveCircleOnMousePress(scene, img, transition);
-
-        this.generateDummyMap();
         this.addSoldierButtons(group);
     }
 
@@ -196,48 +194,48 @@ public class Client extends Application {
 //        return transition;
 //    }
 
-    private void generateDummyMap() {
-        int[][] map = {
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1},
-                {1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
-                {1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
-                {1, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1},
-                {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
-                {1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-        };
-
-        int x = 0;
-        int y = 0;
-        for (int[] line: map) {
-            for (int tile: line) {
-                addTile(tile, x, y);
-                x += 64;
-            }
-            x = 0;
-            y += 64;
-        }
-    }
-
-    private void addTile(int type, int x, int y) {
-        ImageView tile = new ImageView("tiles/grass.jpg");
-        if (type == 2) {
-            tile = new ImageView("tiles/dirt.jpg");
-        }
-
-        tile.setX(x);
-        tile.setY(y);
-
-        tile.setFitHeight(64);
-        tile.setFitWidth(64);
-
-        group.getChildren().add(tile);
-    }
+//    private void generateDummyMap() {
+//        int[][] map = {
+//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+//                {1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1},
+//                {1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
+//                {1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
+//                {1, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1},
+//                {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+//                {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
+//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
+//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
+//                {1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
+//                {1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+//        };
+//
+//        int x = 0;
+//        int y = 0;
+//        for (int[] line: map) {
+//            for (int tile: line) {
+//                addTile(tile, x, y);
+//                x += 64;
+//            }
+//            x = 0;
+//            y += 64;
+//        }
+//    }
+//
+//    private void addTile(int type, int x, int y) {
+//        ImageView tile = new ImageView("tiles/grass.jpg");
+//        if (type == 2) {
+//            tile = new ImageView("tiles/dirt.jpg");
+//        }
+//
+//        tile.setX(x);
+//        tile.setY(y);
+//
+//        tile.setFitHeight(64);
+//        tile.setFitWidth(64);
+//
+//        group.getChildren().add(tile);
+//    }
 
 //    private void moveCircleOnKeyPress(Scene scene, final ImageView img) {
 //        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {

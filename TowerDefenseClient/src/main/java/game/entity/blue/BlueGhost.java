@@ -1,6 +1,7 @@
 package game.entity.blue;
 
 import game.entity.Ghost;
+import game.singleton.ImageStore;
 import javafx.scene.image.ImageView;
 
 import java.util.UUID;
@@ -10,7 +11,7 @@ public class BlueGhost extends Ghost {
         this(UUID.randomUUID());
     }
     public BlueGhost(UUID uuid) {
-        super(uuid, new ImageView("blue/ghost.png"));
+        super(uuid, new ImageView(ImageStore.getInstance().getImage("blue/ghost.png")));
     }
 
     @Override

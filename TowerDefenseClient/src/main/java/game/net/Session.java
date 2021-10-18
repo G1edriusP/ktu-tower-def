@@ -11,6 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import game.entity.blue.*;
 import game.entity.red.*;
+import game.prototype.DirtTile;
+import game.prototype.GrassTile;
+import game.prototype.SandTile;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -31,9 +34,9 @@ public class Session extends WebSocketClient {
      * objects holds all the objects that are shared with a Server by their
      * UUID.
      */
-    private final Map<UUID, IObserver> objects;
+    private final Map<UUID, ISubject> objects;
 
-    public Map<UUID, IObserver> getObjects() {
+    public Map<UUID, ISubject> getObjects() {
         return this.objects;
     }
 
@@ -64,7 +67,7 @@ public class Session extends WebSocketClient {
      *
      * @param object Object to register.
      */
-    public void register(IObserver object) throws URISyntaxException,
+    public void register(ISubject object) throws URISyntaxException,
             InterruptedException, JsonProcessingException {
         if (objects.containsKey(object.getUUID())) {
             System.out.println("trying to register existing: " + object.getUUID());
@@ -82,7 +85,7 @@ public class Session extends WebSocketClient {
      *
      * @param object Object to unregister.
      */
-    public void unregister(IObserver object) {
+    public void unregister(ISubject object) {
         objects.remove(object.getUUID());
     }
 
@@ -104,6 +107,13 @@ public class Session extends WebSocketClient {
                     this.started = true;
                     System.out.println("start");
                     break;
+
+                case "delete":
+                    UUID uuid = UUID.fromString(node.get("uuid").asText());
+                    ISubject object = this.objects.get(uuid);
+                    unregister(object);
+                    // TODO: delete from JAVA FX
+                    break;
                 }
                 return;
             }
@@ -114,55 +124,67 @@ public class Session extends WebSocketClient {
             UUID uuid = UUID.fromString(node.get("uuid").asText());
 
             synchronized (this) {
-                IObserver object = this.objects.get(uuid);
-                if (object == null) {
-                    // New object
-                    // Or a deleted one.. and we are re-creating it..
-                    // TODO: handle deletion
-
-                    // Check for a recognizable type
-                    switch (node.get("type").asText()) {
-                        case "blue-ghost":
-                            object = new BlueGhost(uuid);
-                            break;
-                        case "blue-archer":
-                            object = new BlueArcher(uuid);
-                            break;
-                        case "blue-skeleton":
-                            object = new BlueSkeleton(uuid);
-                            break;
-                        case "blue-barbarian":
-                            object = new BlueBarbarian(uuid);
-                            break;
-                        case "blue-tower":
-                            object = new BlueTower(uuid);
-                            break;
-
-                        case "red-ghost":
-                            object = new RedGhost(uuid);
-                            break;
-                        case "red-archer":
-                            object = new RedArcher(uuid);
-                            break;
-                        case "red-skeleton":
-                            object = new RedSkeleton(uuid);
-                            break;
-                        case "red-barbarian":
-                            object = new RedBarbarian(uuid);
-                            break;
-                        case "red-tower":
-                            object = new RedTower(uuid);
-                            break;
-
-                        default:
-                            System.out.println("unregistered unknown object: " +
-                                    uuid);
-                            return;
-                    }
-                    object.register();
+                ISubject object = this.objects.get(uuid);
+                if (object != null) {
+                    // Update the object
+                    object.receive(message);
+                    return;
                 }
-                // Update the object
+                // New object
+                // Or a deleted one.. and we are re-creating it..
+                // TODO: handle deletion
+
+                // Check for a recognizable type
+                switch (node.get("type").asText()) {
+                    case "blue-ghost":
+                        object = new BlueGhost(uuid);
+                        break;
+                    case "blue-archer":
+                        object = new BlueArcher(uuid);
+                        break;
+                    case "blue-skeleton":
+                        object = new BlueSkeleton(uuid);
+                        break;
+                    case "blue-barbarian":
+                        object = new BlueBarbarian(uuid);
+                        break;
+                    case "blue-tower":
+                        object = new BlueTower(uuid);
+                        break;
+
+                    case "red-ghost":
+                        object = new RedGhost(uuid);
+                        break;
+                    case "red-archer":
+                        object = new RedArcher(uuid);
+                        break;
+                    case "red-skeleton":
+                        object = new RedSkeleton(uuid);
+                        break;
+                    case "red-barbarian":
+                        object = new RedBarbarian(uuid);
+                        break;
+                    case "red-tower":
+                        object = new RedTower(uuid);
+                        break;
+
+                    case "grass-tile":
+                        object = new GrassTile(uuid);
+                        break;
+                    case "dirt-tile":
+                        object = new DirtTile(uuid);
+                        break;
+                    case "sand-tile":
+                        object = new SandTile(uuid);
+                        break;
+
+                    default:
+                        System.out.println("unregistered unknown object: " +
+                                uuid);
+                        return;
+                }
                 object.receive(message);
+                object.register();
             }
         } catch (JsonProcessingException | URISyntaxException |
                 InterruptedException e) {
