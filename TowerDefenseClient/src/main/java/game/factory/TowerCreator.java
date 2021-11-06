@@ -9,12 +9,26 @@ import java.net.URISyntaxException;
 
 public class TowerCreator extends Creator {
     @Override
-    public Tower createTower() {
+    public Tower createFriendlyTower() {
         try {
             if (Session.getInstance().isRed()) {
                 return new RedTower();
             }
             return new BlueTower();
+
+        } catch (URISyntaxException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Tower createEnemyTower() {
+        try {
+            if (Session.getInstance().isRed()) {
+                return new BlueTower();
+            }
+            return new RedTower();
 
         } catch (URISyntaxException | InterruptedException e) {
             e.printStackTrace();

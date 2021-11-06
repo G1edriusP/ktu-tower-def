@@ -1,8 +1,11 @@
 package game.entity.red;
 
+import game.decorator.SoldierSpawnDecorator;
 import game.entity.Tower;
 import game.factory.AbstractSoldierFactory;
+import game.factory.BlueSoldierFactory;
 import game.factory.RedSoldierFactory;
+import game.prototype.Tile;
 import game.singleton.ImageStore;
 import javafx.scene.image.ImageView;
 
@@ -19,7 +22,9 @@ public class RedTower extends Tower {
 
     @Override
     public AbstractSoldierFactory getAbstractSoldierFactory() {
-        return new RedSoldierFactory();
+        AbstractSoldierFactory factory = new RedSoldierFactory();
+        factory = new SoldierSpawnDecorator(factory, this.troopSpawnTile);
+        return factory;
     }
 
     @Override

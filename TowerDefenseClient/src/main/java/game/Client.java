@@ -80,26 +80,32 @@ public class Client extends Application {
     private void gameStart() throws URISyntaxException, InterruptedException, IOException {
         level = new LevelBuilder().newSavannah().level1();
         for (Tile tile: level.getTiles()) {
+            if (tile == null) {
+                continue; // tower placeholders are null
+            }
             addToGroup(tile.getImageView());
         }
+        tower = level.getFriendlyTower();
+        addToGroup(level.getFriendlyTower().getImageView());
+        addToGroup(level.getEnemyTower().getImageView());
 
-        Creator creator = new TowerCreator();
-        tower = creator.createTower();
-        tower.register();
-        if(Session.getInstance().isRed()) {
-            tower.setX(64);
-            tower.setY(10 * 64);
-        } else {
-            tower.setX(16 * 64);
-            tower.setY(64);
-        }
-        tower.send();
+//        Creator creator = new TowerCreator();
+//        tower = creator.createFriendlyTower();
+//        tower.register();
+//        if(Session.getInstance().isRed()) {
+//            tower.setX(64);
+//            tower.setY(10 * 64);
+//        } else {
+//            tower.setX(16 * 64);
+//            tower.setY(64);
+//        }
+//        tower.send();
 
         // Title change
         if(Session.getInstance().isRed()) {
-            this.stage.setTitle("Tower Defense | Red opponent");
+            this.stage.setTitle("Tower Defense | Red");
         } else {
-            this.stage.setTitle("Tower Defense | Blue opponent");
+            this.stage.setTitle("Tower Defense | Blue");
         }
 
         final ImageView img = tower.getImageView();
@@ -163,15 +169,15 @@ public class Client extends Application {
     }
 
     public void addSoldierToMap(ImageView button, Soldier soldier) {
-        Random random = new Random();
+//        Random random = new Random();
         try {
-            if(Session.getInstance().isRed()) {
-                soldier.setY(random.nextInt(150) + 500);
-                soldier.setX(random.nextInt(150) + 100);
-            } else {
-                soldier.setY(random.nextInt(150) + 100);
-                soldier.setX(random.nextInt(150) + 900);
-            }
+//            if(Session.getInstance().isRed()) {
+//                soldier.setY(random.nextInt(150) + 500);
+//                soldier.setX(random.nextInt(150) + 100);
+//            } else {
+//                soldier.setY(random.nextInt(150) + 100);
+//                soldier.setX(random.nextInt(150) + 900);
+//            }
             soldier.register();
         } catch (URISyntaxException | InterruptedException | JsonProcessingException e) {
             e.printStackTrace();

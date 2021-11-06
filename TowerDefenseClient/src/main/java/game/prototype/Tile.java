@@ -1,14 +1,14 @@
 package game.prototype;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import game.net.Image;
 import javafx.scene.image.ImageView;
 
 import java.util.UUID;
 
 abstract public class Tile extends Image implements Cloneable {
-    protected Direction redPath = Direction.None;  // Where red goes to
-    protected Direction bluePath = Direction.None; // Where blue goes to
+    protected Tile redPath = null;
+    protected Tile bluePath = null;
+
     protected Obstacle obstacle = Obstacle.None;   // How much it slows down WALKING soldiers
 
     protected Tile(UUID uuid, ImageView imageView) {
@@ -37,12 +37,12 @@ abstract public class Tile extends Image implements Cloneable {
         return copy;
     }
 
-    public void setRedPath(Direction direction) {
-        this.redPath = direction;
+    public void setRedPath(Tile tile) {
+        this.redPath = tile;
     }
 
-    public void setBluePath(Direction direction) {
-        this.bluePath = direction;
+    public void setBluePath(Tile tile) {
+        this.bluePath = tile;
     }
 
     public void setObstacle(Obstacle obstacle) { this.obstacle = obstacle; }

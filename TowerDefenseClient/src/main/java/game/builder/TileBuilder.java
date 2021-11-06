@@ -20,16 +20,6 @@ public class TileBuilder {
         return this;
     }
 
-    public TileBuilder addRedPath(Direction direction) {
-        this.tile.setRedPath(direction);
-        return this;
-    }
-
-    public TileBuilder addBluePath(Direction direction) {
-        this.tile.setBluePath(direction);
-        return this;
-    }
-
     public TileBuilder addObstacle(Obstacle obstacle) {
         this.tile.setObstacle(obstacle);
         return this;

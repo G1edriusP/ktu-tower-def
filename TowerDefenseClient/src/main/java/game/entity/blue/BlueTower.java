@@ -1,5 +1,6 @@
 package game.entity.blue;
 
+import game.decorator.SoldierSpawnDecorator;
 import game.entity.Tower;
 import game.factory.AbstractSoldierFactory;
 import game.factory.BlueSoldierFactory;
@@ -19,7 +20,9 @@ public class BlueTower extends Tower {
 
     @Override
     public AbstractSoldierFactory getAbstractSoldierFactory() {
-        return new BlueSoldierFactory();
+        AbstractSoldierFactory factory = new BlueSoldierFactory();
+        factory = new SoldierSpawnDecorator(factory, this.troopSpawnTile);
+        return factory;
     }
 
     @Override
