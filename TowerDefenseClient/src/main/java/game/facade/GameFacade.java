@@ -87,8 +87,6 @@ public class GameFacade {
     }
 
     private void gameLoop() {
-        Session session = Session.getInstance();
-
         while(true) {
             for (Map.Entry<UUID, ISubject> entry : Session.getInstance().getObjects().entrySet()) {
                 if (!(entry.getValue() instanceof Soldier)) {
@@ -96,13 +94,7 @@ public class GameFacade {
                 }
 
                 Soldier soldier = (Soldier) entry.getValue();
-                if (soldier.isRed() && session.isRed()){
-                    soldier.move();
-                }
-
-                if (soldier.isBlue() && session.isBlue()){
-                    soldier.move();
-                }
+                moveSoldiers(soldier);
             }
 
             try {
@@ -111,5 +103,21 @@ public class GameFacade {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void moveSoldiers(Soldier soldier) {
+        Session session = Session.getInstance();
+
+        if (soldier.isRed() && session.isRed()){
+            soldier.move();
+        }
+
+        if (soldier.isBlue() && session.isBlue()){
+            soldier.move();
+        }
+    }
+
+    private void checkAttack() {
+        // TODO: implement
     }
 }

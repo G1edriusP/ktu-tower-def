@@ -1,10 +1,12 @@
 package game.bridge;
 
-public class Bone extends Weapon {
+import game.adapter.MeleeWeapon;
+
+public class Bone implements MeleeWeapon {
     final int damage = 50;
 
     @Override
-    public int getDamage() {
-        return damage;
+    public int getMeleeDamage() {
+        return this.damage;
     }
 }

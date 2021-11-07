@@ -1,10 +1,12 @@
 package game.bridge;
 
-public class SpiritOrb extends Weapon {
+import game.adapter.RangeWeapon;
+
+public class SpiritOrb implements RangeWeapon {
     final int damage = 24;
 
     @Override
-    public int getDamage() {
-        return damage;
+    public int getRangeDamage() {
+        return this.damage;
     }
 }

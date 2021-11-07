@@ -1,5 +1,6 @@
 package game.entity;
 
+import game.adapter.MeleeWeaponAdapter;
 import game.bridge.Bone;
 import game.strategy.Melee;
 import game.strategy.Teleport;
@@ -13,6 +14,6 @@ abstract public class Skeleton extends Soldier {
         this.movement = new Teleport();
         this.attack = new Melee();
         this.health = 70;
-        this.weapon = new Bone();
+        this.weapon = new MeleeWeaponAdapter(new Bone());
     }
 }

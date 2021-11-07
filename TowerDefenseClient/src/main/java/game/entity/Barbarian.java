@@ -1,5 +1,6 @@
 package game.entity;
 
+import game.adapter.MeleeWeaponAdapter;
 import game.bridge.Mace;
 import game.strategy.Melee;
 import game.strategy.Walk;
@@ -12,6 +13,6 @@ abstract public class Barbarian extends Soldier {
         this.movement = new Walk();
         this.attack = new Melee();
         this.health = 150;
-        this.weapon = new Mace();
+        this.weapon = new MeleeWeaponAdapter(new Mace());
     }
 }

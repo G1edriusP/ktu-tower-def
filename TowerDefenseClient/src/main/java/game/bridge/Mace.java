@@ -1,10 +1,12 @@
 package game.bridge;
 
-public class Mace extends Weapon {
+import game.adapter.MeleeWeapon;
+
+public class Mace implements MeleeWeapon {
     final int damage = 69;
 
     @Override
-    public int getDamage() {
-        return damage;
+    public int getMeleeDamage() {
+        return this.damage;
     }
 }

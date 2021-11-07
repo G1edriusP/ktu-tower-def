@@ -1,10 +1,12 @@
 package game.bridge;
 
-public class Bow extends Weapon {
+import game.adapter.RangeWeapon;
+
+public class Bow implements RangeWeapon {
     final int damage = 39;
 
     @Override
-    public int getDamage() {
-        return damage;
+    public int getRangeDamage() {
+        return this.damage;
     }
 }
