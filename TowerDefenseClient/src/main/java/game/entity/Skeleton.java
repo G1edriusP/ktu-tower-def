@@ -1,5 +1,6 @@
 package game.entity;
 
+import game.bridge.Bone;
 import game.strategy.Melee;
 import game.strategy.Teleport;
 import javafx.scene.image.ImageView;
@@ -12,5 +13,6 @@ abstract public class Skeleton extends Soldier {
         this.movement = new Teleport();
         this.attack = new Melee();
         this.health = 70;
+        this.weapon = new Bone();
     }
 }

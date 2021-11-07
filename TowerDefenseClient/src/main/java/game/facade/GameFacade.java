@@ -44,12 +44,7 @@ public class GameFacade {
 
         addButtons();
 
-        Thread gameLoopThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                gameLoop();
-            }
-        });
+        Thread gameLoopThread = new Thread(() -> gameLoop());
 
         gameLoopThread.start();
 

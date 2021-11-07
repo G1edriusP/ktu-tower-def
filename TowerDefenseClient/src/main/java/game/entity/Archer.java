@@ -1,5 +1,6 @@
 package game.entity;
 
+import game.bridge.Bow;
 import game.strategy.Range;
 import game.strategy.Walk;
 import javafx.scene.image.ImageView;
@@ -12,5 +13,6 @@ abstract public class Archer extends Soldier {
         this.movement = new Walk();
         this.attack = new Range();
         this.health = 80;
+        this.weapon = new Bow();
     }
 }

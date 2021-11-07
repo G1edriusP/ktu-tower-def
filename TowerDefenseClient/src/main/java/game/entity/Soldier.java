@@ -4,6 +4,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import game.bridge.Weapon;
 import game.prototype.Tile;
 import game.strategy.Attack;
 import game.strategy.Movement;
@@ -17,6 +18,8 @@ abstract public class Soldier extends Image {
     protected Attack attack;
     @JsonIgnore
     protected Tile tile;
+    @JsonIgnore
+    protected Weapon weapon;
 
     protected int health;
 
@@ -36,7 +39,7 @@ abstract public class Soldier extends Image {
     }
 
     public void attack(Soldier target) {
-        this.attack.attack(target);
+        this.attack.attack(this, target);
     }
 
     public void move() {
@@ -77,4 +80,8 @@ abstract public class Soldier extends Image {
     public Tile getTile() {
         return this.tile;
     }
+
+    public void setWeapon(Weapon weapon) { this.weapon = weapon; }
+
+    public Weapon getWeapon() { return this.weapon; };
 }

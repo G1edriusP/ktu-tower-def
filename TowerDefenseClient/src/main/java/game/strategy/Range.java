@@ -4,8 +4,8 @@ import game.entity.Soldier;
 
 public class Range extends Attack{
     @Override
-    public void attack(Soldier target) {
-        target.doDamage(39);
+    public void attack(Soldier attacker, Soldier target) {
+        target.doDamage(attacker.getWeapon().getDamage());
 
         if (target.isDead()) {
             target.sendDelete();

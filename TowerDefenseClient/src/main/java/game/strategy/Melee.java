@@ -4,8 +4,8 @@ import game.entity.Soldier;
 
 public class Melee extends Attack{
     @Override
-    public void attack(Soldier target) {
-        target.doDamage(60);
+    public void attack(Soldier attacker, Soldier target) {
+        target.doDamage(attacker.getWeapon().getDamage());
 
         if (target.isDead()) {
             target.sendDelete();
