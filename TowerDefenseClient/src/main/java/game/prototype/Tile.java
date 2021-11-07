@@ -46,4 +46,12 @@ abstract public class Tile extends Image implements Cloneable {
     }
 
     public void setObstacle(Obstacle obstacle) { this.obstacle = obstacle; }
+
+    public Tile getRedPath() {
+        return this.redPath;
+    }
+
+    public Tile getBluePath() {
+        return this.bluePath;
+    }
 }

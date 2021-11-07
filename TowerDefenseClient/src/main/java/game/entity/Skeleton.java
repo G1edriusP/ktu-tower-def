@@ -11,5 +11,6 @@ abstract public class Skeleton extends Soldier {
         super(uuid, imageView);
         this.movement = new Teleport();
         this.attack = new Melee();
+        this.health = 70;
     }
 }

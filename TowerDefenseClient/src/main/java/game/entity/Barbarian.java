@@ -10,5 +10,6 @@ abstract public class Barbarian extends Soldier {
         super(uuid, imageView);
         this.movement = new Walk();
         this.attack = new Melee();
+        this.health = 150;
     }
 }

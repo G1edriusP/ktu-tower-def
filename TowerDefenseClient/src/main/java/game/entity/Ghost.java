@@ -10,5 +10,6 @@ abstract public class Ghost extends Soldier {
         super(uuid, imageView);
         this.movement = new Teleport();
         this.attack = new Range();
+        this.health = 130;
     }
 }

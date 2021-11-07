@@ -11,5 +11,6 @@ abstract public class Archer extends Soldier {
         super(uuid, imageView);
         this.movement = new Walk();
         this.attack = new Range();
+        this.health = 80;
     }
 }
