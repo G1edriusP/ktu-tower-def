@@ -1,12 +1,10 @@
 package game.facade;
 
 import game.builder.LevelBuilder;
-import game.entity.Archer;
-import game.entity.Barbarian;
-import game.entity.Ghost;
-import game.entity.Skeleton;
+import game.entity.*;
 import game.factory.AbstractSoldierFactory;
 import game.level.Level;
+import game.net.ISubject;
 import game.net.Image;
 import game.net.Session;
 import javafx.event.EventHandler;
@@ -15,6 +13,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class GameFacade {
@@ -43,6 +43,16 @@ public class GameFacade {
         );
 
         addButtons();
+
+        Thread gameLoopThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                gameLoop();
+            }
+        });
+
+        gameLoopThread.start();
+
     }
 
     private void addButtons() {
@@ -79,5 +89,32 @@ public class GameFacade {
         button.setFitWidth(100);
         button.setOnMouseClicked(onClick);
         group.getChildren().add(button);
+    }
+
+    private void gameLoop() {
+        Session session = Session.getInstance();
+
+        while(true) {
+            for (Map.Entry<UUID, ISubject> entry : Session.getInstance().getObjects().entrySet()) {
+                if (!(entry.getValue() instanceof Soldier)) {
+                    continue;
+                }
+
+                Soldier soldier = (Soldier) entry.getValue();
+                if (soldier.isRed() && session.isRed()){
+                    soldier.move();
+                }
+
+                if (soldier.isBlue() && session.isBlue()){
+                    soldier.move();
+                }
+            }
+
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

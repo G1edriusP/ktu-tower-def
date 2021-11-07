@@ -21,6 +21,7 @@ public class SoldierSpawnDecorator extends AbstractSoldierFactory {
         Ghost ghost = this.soldierFactory.createGhost();
         ghost.setX(spawnTile.getX());
         ghost.setY(spawnTile.getY());
+        ghost.setTile(spawnTile);
         return ghost;
     }
 
@@ -29,6 +30,7 @@ public class SoldierSpawnDecorator extends AbstractSoldierFactory {
         Archer archer = this.soldierFactory.createArcher();
         archer.setX(spawnTile.getX());
         archer.setY(spawnTile.getY());
+        archer.setTile(spawnTile);
         return archer;
     }
 
@@ -37,6 +39,7 @@ public class SoldierSpawnDecorator extends AbstractSoldierFactory {
         Skeleton skeleton = this.soldierFactory.createSkeleton();
         skeleton.setX(spawnTile.getX());
         skeleton.setY(spawnTile.getY());
+        skeleton.setTile(spawnTile);
         return skeleton;
     }
 
@@ -45,6 +48,7 @@ public class SoldierSpawnDecorator extends AbstractSoldierFactory {
         Barbarian barbarian = this.soldierFactory.createBarbarian();
         barbarian.setX(spawnTile.getX());
         barbarian.setY(spawnTile.getY());
+        barbarian.setTile(spawnTile);
         return barbarian;
     }
 }

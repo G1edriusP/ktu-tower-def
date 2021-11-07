@@ -2,6 +2,8 @@ package game.entity;
 
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import game.prototype.Tile;
 import game.strategy.Attack;
 import game.strategy.Movement;
@@ -13,6 +15,8 @@ abstract public class Soldier extends Image {
     protected Movement movement;
     @JsonIgnore
     protected Attack attack;
+    @JsonIgnore
+    protected Tile tile;
 
     protected int health;
 
@@ -35,8 +39,8 @@ abstract public class Soldier extends Image {
         this.attack.attack(target);
     }
 
-    public void move(Tile tile) {
-        this.movement.move(this, tile);
+    public void move() {
+        this.movement.move(this);
     }
 
     public boolean isRed() {
@@ -47,11 +51,30 @@ abstract public class Soldier extends Image {
         return this.getType().toUpperCase().contains("BLUE");
     }
 
+    @Override
+    public void receive(String json) {
+        super.receive(json);
+        try {
+            Soldier soldier = new ObjectMapper().readValue(json, this.getClass());
+            this.health = soldier.health;
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void doDamage(int damage) {
         this.health -= damage;
     }
 
     public boolean isDead() {
         return this.health <= 0;
+    }
+
+    public void setTile(Tile tile) {
+        this.tile = tile;
+    }
+
+    public Tile getTile() {
+        return this.tile;
     }
 }
