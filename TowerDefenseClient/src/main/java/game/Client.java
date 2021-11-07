@@ -1,37 +1,30 @@
 package game;
 
-import java.net.URISyntaxException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.IOException;
-
 import game.builder.LevelBuilder;
 import game.entity.*;
-import game.factory.Creator;
-import game.factory.TowerCreator;
+import game.factory.AbstractSoldierFactory;
 import game.level.Level;
 import game.net.ISubject;
-import game.prototype.Tile;
-import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
+import javafx.collections.MapChangeListener;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import game.net.Image;
 import game.net.Session;
-
 import javafx.application.Application;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Client extends Application {
-    private Stage stage;
     private Level level;
+
     final Group group = new Group();
     final Scene scene = new Scene(group, 1152, 768);
-    private Tower tower;
-//    private static final int KEYBOARD_MOVEMENT_DELTA = 10;
-//    private static final Duration TRANSLATE_DURATION = Duration.seconds(0.20);
+    private AbstractSoldierFactory soldierFactory;
 
     public static void main(String[] args) {
         launch(args);
@@ -44,239 +37,76 @@ public class Client extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
-        final boolean[] once = {true};
-        Map<UUID, Image> drawnObjects = new HashMap<>();
+    public void start(Stage stage)  {
         Session session = Session.getInstance();
-        new AnimationTimer() {
-            @Override
-            public void handle(long l) {
-                try {
-                    if (once[0] && session.isStarted()) {
-                        once[0] = false;
-                            gameStart();
-                    }
 
-                    for (Map.Entry<UUID, ISubject> entry : session.getObjects().entrySet()) {
-                        if(drawnObjects.containsKey(entry.getKey())) {
-                            continue;
-                        }
-                        Image serversideImage = (Image) entry.getValue();
-                        serversideImage.addToGroup(group);
-                        drawnObjects.put(entry.getKey(), serversideImage);
-                    }
+        session.getStarted().addListener(observable -> Platform.runLater(() -> Client.this.gameStart(stage)));
 
-                } catch (URISyntaxException | InterruptedException | IOException e) {
-                    e.printStackTrace();
-                }
+        session.getObjects().addListener((MapChangeListener<UUID, ISubject>) change -> {
+            if (change.wasAdded()) {
+                Image image = (Image) change.getValueAdded();
+                Platform.runLater(() -> group.getChildren().add(image.getImageView()));
             }
-        }.start();
+            if (change.wasRemoved()) {
+                Image image = (Image) change.getValueRemoved();
+                Platform.runLater(() -> group.getChildren().remove(image.getImageView()));
+            }
+        });
 
-        this.stage = stage;
         stage.setScene(scene);
         stage.show();
     }
 
-    private void gameStart() throws URISyntaxException, InterruptedException, IOException {
+    private void gameStart(Stage stage) {
+        stage.setTitle("Tower Defense | " + (Session.getInstance().isRed() ? "Red" : "Blue"));
+
         level = new LevelBuilder().newSavannah().level1();
-        for (Tile tile: level.getTiles()) {
-            if (tile == null) {
-                continue; // tower placeholders are null
-            }
-            addToGroup(tile.getImageView());
-        }
-        tower = level.getFriendlyTower();
-        addToGroup(level.getFriendlyTower().getImageView());
-        addToGroup(level.getEnemyTower().getImageView());
+        soldierFactory = level.getFriendlyTower().getAbstractSoldierFactory();
 
-//        Creator creator = new TowerCreator();
-//        tower = creator.createFriendlyTower();
-//        tower.register();
-//        if(Session.getInstance().isRed()) {
-//            tower.setX(64);
-//            tower.setY(10 * 64);
-//        } else {
-//            tower.setX(16 * 64);
-//            tower.setY(64);
-//        }
-//        tower.send();
+        group.getChildren().addAll(
+            level.getTiles().stream().map(Image::getImageView).collect(Collectors.toList())
+        );
+        group.getChildren().addAll(
+            level.getFriendlyTower().getImageView(),
+            level.getEnemyTower().getImageView()
+        );
 
-        // Title change
-        if(Session.getInstance().isRed()) {
-            this.stage.setTitle("Tower Defense | Red");
-        } else {
-            this.stage.setTitle("Tower Defense | Blue");
-        }
-
-        final ImageView img = tower.getImageView();
-        this.addSoldierButtons(group);
+        addButtons();
     }
 
-    private void updateTroopPosition(double x, double y, ImageView img) {
-        tower.setX(x);
-        tower.setY(y);
-        tower.send();
-    }
-
-    public void addSoldierButtons(Group group) throws IOException {
-        ImageView barbarianButtonView = new ImageView("images/barbarian.png");
-        ImageView ghostButtonView = new ImageView("images/ghost.png");
-        ImageView archerButtonView = new ImageView("images/archer.png");
-        ImageView skeletonButtonView = new ImageView("images/skeleton.png");
-
-        barbarianButtonView.setX(600);
-        barbarianButtonView.setY(650);
-        ghostButtonView.setX(720);
-        ghostButtonView.setY(650);
-        archerButtonView.setX(840);
-        archerButtonView.setY(650);
-        skeletonButtonView.setX(960);
-        skeletonButtonView.setY(650);
-
-        barbarianButtonView.setFitHeight(100);
-        barbarianButtonView.setFitWidth(100);
-        ghostButtonView.setFitHeight(100);
-        ghostButtonView.setFitWidth(100);
-        archerButtonView.setFitHeight(100);
-        archerButtonView.setFitWidth(100);
-        skeletonButtonView.setFitHeight(100);
-        skeletonButtonView.setFitWidth(100);
-
-        barbarianButtonView.setOnMouseClicked(button -> {
-            Barbarian barbarian = tower.getAbstractSoldierFactory().createBarbarian();
-            addSoldierToMap(barbarianButtonView, barbarian);
+    private void addButtons() {
+        addButton("images/barbarian.png", 600, 650, button -> {
+            Barbarian barbarian = soldierFactory.createBarbarian();
+            barbarian.register();
+            barbarian.send();
         });
 
-        skeletonButtonView.setOnMouseClicked(button -> {
-            Skeleton skeleton = tower.getAbstractSoldierFactory().createSkeleton();
-            addSoldierToMap(skeletonButtonView, skeleton);
+        addButton("images/ghost.png", 720, 650, button -> {
+            Ghost ghost = soldierFactory.createGhost();
+            ghost.register();
+            ghost.send();
         });
 
-        ghostButtonView.setOnMouseClicked(button -> {
-            Ghost ghost = tower.getAbstractSoldierFactory().createGhost();
-            addSoldierToMap(ghostButtonView, ghost);
+        addButton("images/archer.png", 840, 650, button -> {
+            Archer archer = soldierFactory.createArcher();
+            archer.register();
+            archer.send();
         });
 
-        archerButtonView.setOnMouseClicked(button -> {
-            Archer archer = tower.getAbstractSoldierFactory().createArcher();
-            addSoldierToMap(archerButtonView, archer);
+        addButton("images/skeleton.png", 960, 650, button -> {
+            Skeleton skeleton = soldierFactory.createSkeleton();
+            skeleton.register();
+            skeleton.send();
         });
-
-        group.getChildren().add(barbarianButtonView);
-        group.getChildren().add(ghostButtonView);
-        group.getChildren().add(archerButtonView);
-        group.getChildren().add(skeletonButtonView);
     }
 
-    public void addSoldierToMap(ImageView button, Soldier soldier) {
-//        Random random = new Random();
-        try {
-//            if(Session.getInstance().isRed()) {
-//                soldier.setY(random.nextInt(150) + 500);
-//                soldier.setX(random.nextInt(150) + 100);
-//            } else {
-//                soldier.setY(random.nextInt(150) + 100);
-//                soldier.setX(random.nextInt(150) + 900);
-//            }
-            soldier.register();
-        } catch (URISyntaxException | InterruptedException | JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        soldier.send();
+    private void addButton(String url, double x, double y,  EventHandler<? super MouseEvent> onClick) {
+        ImageView button = new ImageView(url);
+        button.setX(x);
+        button.setY(y);
+        button.setFitHeight(100);
+        button.setFitWidth(100);
+        button.setOnMouseClicked(onClick);
+        group.getChildren().add(button);
     }
-
-    public void addToGroup(Node object) {
-        group.getChildren().add(object);
-    }
-
-//    private TranslateTransition createTranslateTransition(final ImageView img) {
-//        final TranslateTransition transition = new TranslateTransition(TRANSLATE_DURATION, img);
-//        transition.setOnFinished(t -> {
-//            img.setX(img.getTranslateX() + img.getX());
-//            img.setY(img.getTranslateY() + img.getY());
-//            img.setTranslateX(0);
-//            img.setTranslateY(0);
-//        });
-//        return transition;
-//    }
-
-//    private void generateDummyMap() {
-//        int[][] map = {
-//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-//                {1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1},
-//                {1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
-//                {1, 1, 1, 2, 2, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1},
-//                {1, 1, 1, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1},
-//                {1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-//                {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
-//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
-//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1},
-//                {1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1},
-//                {1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-//                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-//        };
-//
-//        int x = 0;
-//        int y = 0;
-//        for (int[] line: map) {
-//            for (int tile: line) {
-//                addTile(tile, x, y);
-//                x += 64;
-//            }
-//            x = 0;
-//            y += 64;
-//        }
-//    }
-//
-//    private void addTile(int type, int x, int y) {
-//        ImageView tile = new ImageView("tiles/grass.jpg");
-//        if (type == 2) {
-//            tile = new ImageView("tiles/dirt.jpg");
-//        }
-//
-//        tile.setX(x);
-//        tile.setY(y);
-//
-//        tile.setFitHeight(64);
-//        tile.setFitWidth(64);
-//
-//        group.getChildren().add(tile);
-//    }
-
-//    private void moveCircleOnKeyPress(Scene scene, final ImageView img) {
-//        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-//            @Override
-//            public void handle(KeyEvent event) {
-//                switch (event.getCode()) {
-//                    case UP, W:
-//                        updateTroopPosition(img.getX(), img.getY() - KEYBOARD_MOVEMENT_DELTA, img);
-//                        break;
-//                    case RIGHT, D:
-//                        updateTroopPosition(img.getX() + KEYBOARD_MOVEMENT_DELTA, img.getY(), img);
-//                        break;
-//                    case DOWN, S:
-//                        updateTroopPosition(img.getX(), img.getY() + KEYBOARD_MOVEMENT_DELTA, img);
-//                        break;
-//                    case LEFT, A:
-//                        updateTroopPosition(img.getX() - KEYBOARD_MOVEMENT_DELTA, img.getY(), img);
-//                        break;
-//                }
-//            }
-//        });
-//    }
-
-//    private void moveCircleOnMousePress(Scene scene, final ImageView img, final TranslateTransition transition) {
-//        scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                if (!event.isControlDown()) {
-//                    updateTroopPosition(event.getSceneX(), event.getSceneY(), img);
-//                } else {
-//                    transition.setToX(event.getSceneX() - img.getX());
-//                    transition.setToY(event.getSceneY() - img.getY());
-//                    transition.playFromStart();
-//                }
-//            }
-//        });
-//    }
 }

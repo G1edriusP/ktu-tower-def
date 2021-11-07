@@ -1,8 +1,6 @@
 package game.builder;
 
-import game.decorator.SoldierSpawnDecorator;
 import game.entity.Tower;
-import game.entity.red.RedTower;
 import game.factory.Creator;
 import game.factory.TowerCreator;
 import game.level.Level;

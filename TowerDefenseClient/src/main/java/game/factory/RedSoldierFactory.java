@@ -8,7 +8,6 @@ import game.entity.red.RedArcher;
 import game.entity.red.RedBarbarian;
 import game.entity.red.RedGhost;
 import game.entity.red.RedSkeleton;
-import game.prototype.Tile;
 
 public class RedSoldierFactory extends AbstractSoldierFactory {
     @Override

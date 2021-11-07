@@ -1,7 +1,6 @@
 package game.entity;
 
 import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import game.strategy.Attack;
 import game.strategy.Movement;

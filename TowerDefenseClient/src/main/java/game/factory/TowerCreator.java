@@ -5,34 +5,20 @@ import game.entity.red.RedTower;
 import game.entity.Tower;
 import game.net.Session;
 
-import java.net.URISyntaxException;
-
 public class TowerCreator extends Creator {
     @Override
     public Tower createFriendlyTower() {
-        try {
-            if (Session.getInstance().isRed()) {
-                return new RedTower();
-            }
-            return new BlueTower();
-
-        } catch (URISyntaxException | InterruptedException e) {
-            e.printStackTrace();
+        if (Session.getInstance().isRed()) {
+            return new RedTower();
         }
-        return null;
+        return new BlueTower();
     }
 
     @Override
     public Tower createEnemyTower() {
-        try {
-            if (Session.getInstance().isRed()) {
-                return new BlueTower();
-            }
-            return new RedTower();
-
-        } catch (URISyntaxException | InterruptedException e) {
-            e.printStackTrace();
+        if (Session.getInstance().isRed()) {
+            return new BlueTower();
         }
-        return null;
+        return new RedTower();
     }
 }

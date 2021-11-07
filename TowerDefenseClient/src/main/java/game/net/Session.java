@@ -2,10 +2,7 @@ package game.net;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import java.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,6 +11,11 @@ import game.entity.red.*;
 import game.prototype.DirtTile;
 import game.prototype.GrassTile;
 import game.prototype.SandTile;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -28,29 +30,39 @@ public class Session extends WebSocketClient {
 
     private boolean red = false;
 
-    private boolean started;
+    private BooleanProperty started;
 
     /**
      * objects holds all the objects that are shared with a Server by their
      * UUID.
      */
-    private final Map<UUID, ISubject> objects;
+    private final ObservableMap<UUID, ISubject> objects;
 
-    public Map<UUID, ISubject> getObjects() {
+    public ObservableMap<UUID, ISubject> getObjects() {
         return this.objects;
     }
 
-    private Session() throws InterruptedException, URISyntaxException {
+    private Session() throws URISyntaxException {
         super(new URI("ws://localhost:8887"));
-        objects = new HashMap<>();
-        started = false;
-        connectBlocking();
+
+        objects = FXCollections.observableMap(new HashMap<>());
+        started = new SimpleBooleanProperty(false);
+
+        try {
+            connectBlocking();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static synchronized Session getInstance() throws URISyntaxException,
-            InterruptedException {
-        if (instance == null)
-            instance = new Session();
+    public static synchronized Session getInstance() {
+        if (instance == null) {
+            try {
+                instance = new Session();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return instance;
     }
 
@@ -67,8 +79,7 @@ public class Session extends WebSocketClient {
      *
      * @param object Object to register.
      */
-    public void register(ISubject object) throws URISyntaxException,
-            InterruptedException, JsonProcessingException {
+    public void register(ISubject object)  {
         if (objects.containsKey(object.getUUID())) {
             System.out.println("trying to register existing: " + object.getUUID());
             return;
@@ -79,9 +90,6 @@ public class Session extends WebSocketClient {
 
     /**
      * unregister unregisters the object.
-     * <p>
-     * TODO: deletion is lacking ATM. Deleted objects may be deleted locally but
-     * will re-appear the second they are updated by the Server.
      *
      * @param object Object to unregister.
      */
@@ -95,25 +103,24 @@ public class Session extends WebSocketClient {
     }
 
     @Override
-    public void onMessage(String message) {
+    public void onMessage(String message)  {
+        // Try extracting UUID from the message.
         try {
-            // Try extracting UUID from the message.
             ObjectNode node = new ObjectMapper().readValue(message, ObjectNode.class);
 
             if (node.has("action")) {
                 switch (node.get("action").asText("")) {
-                case "sessionStart":
-                    this.red = node.get("red").asBoolean();
-                    this.started = true;
-                    System.out.println("start");
-                    break;
+                    case "sessionStart":
+                        this.red = node.get("red").asBoolean();
+                        this.started.setValue(true);
+                        System.out.println("start");
+                        break;
 
-                case "delete":
-                    UUID uuid = UUID.fromString(node.get("uuid").asText());
-                    ISubject object = this.objects.get(uuid);
-                    unregister(object);
-                    // TODO: delete from JAVA FX
-                    break;
+                    case "delete":
+                        UUID uuid = UUID.fromString(node.get("uuid").asText());
+                        ISubject object = this.objects.get(uuid);
+                        unregister(object);
+                        break;
                 }
                 return;
             }
@@ -131,9 +138,6 @@ public class Session extends WebSocketClient {
                     return;
                 }
                 // New object
-                // Or a deleted one.. and we are re-creating it..
-                // TODO: handle deletion
-
                 // Check for a recognizable type
                 switch (node.get("type").asText()) {
                     case "blue-ghost":
@@ -186,8 +190,7 @@ public class Session extends WebSocketClient {
                 object.receive(message);
                 object.register();
             }
-        } catch (JsonProcessingException | URISyntaxException |
-                InterruptedException e) {
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
@@ -204,7 +207,7 @@ public class Session extends WebSocketClient {
         // System.exit(1);
     }
 
-    public boolean isStarted() {
+    public ObservableBooleanValue getStarted() {
         return this.started;
     }
 }

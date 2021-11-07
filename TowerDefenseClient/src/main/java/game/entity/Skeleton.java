@@ -1,9 +1,7 @@
 package game.entity;
 
 import game.strategy.Melee;
-import game.strategy.Range;
 import game.strategy.Teleport;
-import game.strategy.Walk;
 import javafx.scene.image.ImageView;
 
 import java.util.UUID;

@@ -47,7 +47,6 @@ public class Server extends WebSocketServer {
             }
 
             // Else create a new session with 1 connection
-            System.out.println("red");
             Session session = new Session(conn);
             sessionList.add(session);
             sessionMap.put(conn, session);

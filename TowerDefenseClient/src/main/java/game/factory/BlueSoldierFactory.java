@@ -8,7 +8,6 @@ import game.entity.blue.BlueArcher;
 import game.entity.blue.BlueBarbarian;
 import game.entity.blue.BlueGhost;
 import game.entity.blue.BlueSkeleton;
-import game.prototype.Tile;
 
 public class BlueSoldierFactory extends AbstractSoldierFactory {
     @Override

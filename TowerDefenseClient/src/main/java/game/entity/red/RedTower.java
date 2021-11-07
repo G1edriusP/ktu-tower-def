@@ -3,9 +3,7 @@ package game.entity.red;
 import game.decorator.SoldierSpawnDecorator;
 import game.entity.Tower;
 import game.factory.AbstractSoldierFactory;
-import game.factory.BlueSoldierFactory;
 import game.factory.RedSoldierFactory;
-import game.prototype.Tile;
 import game.singleton.ImageStore;
 import javafx.scene.image.ImageView;
 

@@ -1,8 +1,6 @@
 package game.level;
 
 import game.entity.Tower;
-import game.factory.Creator;
-import game.factory.TowerCreator;
 import game.prototype.Tile;
 
 import java.util.ArrayList;

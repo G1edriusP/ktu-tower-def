@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.scene.Group;
 import javafx.scene.image.ImageView;
-
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -35,15 +32,19 @@ abstract public class Image implements ISubject {
         this(UUID.randomUUID(), imageView);
     }
 
-    public void send()  {
+    public void send() {
         try {
             Session.getInstance().send(new ObjectMapper().writeValueAsString(this));
-        } catch (URISyntaxException | InterruptedException | JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
-    public void register() throws URISyntaxException, InterruptedException, JsonProcessingException{
+    public void sendDelete() {
+        Session.getInstance().send("{\"action\":\"delete\",\"uuid\":\"" + this.uuid + "\"}");
+    }
+
+    public void register() {
         Session.getInstance().register(this);
     }
 
@@ -60,15 +61,16 @@ abstract public class Image implements ISubject {
         return this.imageView;
     }
 
-    public void addToGroup(Group group) {
-        group.getChildren().add(this.getImageView());
-    }
-
     @Override
-    public void receive(String json) throws JsonProcessingException {
-        Image img = new ObjectMapper().readValue(json, this.getClass());
-        this.setX(img.getX());
-        this.setY(img.getY());
+    public void receive(String json)  {
+        try {
+            Image img = new ObjectMapper().readValue(json, this.getClass());
+            this.setX(img.getX());
+            this.setY(img.getY());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public double getX() {

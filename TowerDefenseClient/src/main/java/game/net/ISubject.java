@@ -1,6 +1,5 @@
 package game.net;
 
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,9 +9,9 @@ public interface ISubject {
      * send sends this Object over to the Server.
      */
     void send();
+    void sendDelete();
 
-    void register() throws URISyntaxException, InterruptedException, JsonProcessingException;
-
+    void register();
     void receive(String json) throws JsonProcessingException;
 
     UUID getUUID();
