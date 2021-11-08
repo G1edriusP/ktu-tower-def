@@ -1,6 +1,7 @@
 package game.facade;
 
 import game.builder.LevelBuilder;
+import game.command.SoldiersBarracks;
 import game.entity.*;
 import game.factory.AbstractSoldierFactory;
 import game.level.Level;
@@ -21,8 +22,8 @@ public class GameFacade {
 
     private Level level;
     private AbstractSoldierFactory soldierFactory;
-
     private Group group;
+    private SoldiersBarracks barracks;
 
     public void setGroup(Group group) {
         this.group = group;
@@ -33,6 +34,7 @@ public class GameFacade {
 
         level = new LevelBuilder().newGrasslands().level3();
         soldierFactory = level.getFriendlyTower().getAbstractSoldierFactory();
+        barracks = new SoldiersBarracks(soldierFactory, group);
 
         group.getChildren().addAll(
                 level.getTiles().stream().map(Image::getImageView).collect(Collectors.toList())
@@ -48,42 +50,6 @@ public class GameFacade {
 
         gameLoopThread.start();
 
-    }
-
-    private void addButtons() {
-        addButton("images/barbarian.png", 600, 650, button -> {
-            Soldier barbarian = soldierFactory.createBarbarian();
-            barbarian.register();
-            barbarian.send();
-        });
-
-        addButton("images/ghost.png", 720, 650, button -> {
-            Ghost ghost = soldierFactory.createGhost();
-            ghost.register();
-            ghost.send();
-        });
-
-        addButton("images/archer.png", 840, 650, button -> {
-            Archer archer = soldierFactory.createArcher();
-            archer.register();
-            archer.send();
-        });
-
-        addButton("images/skeleton.png", 960, 650, button -> {
-            Skeleton skeleton = soldierFactory.createSkeleton();
-            skeleton.register();
-            skeleton.send();
-        });
-    }
-
-    private void addButton(String url, double x, double y, EventHandler<? super MouseEvent> onClick) {
-        ImageView button = new ImageView(url);
-        button.setX(x);
-        button.setY(y);
-        button.setFitHeight(100);
-        button.setFitWidth(100);
-        button.setOnMouseClicked(onClick);
-        group.getChildren().add(button);
     }
 
     private void gameLoop() {
@@ -115,6 +81,27 @@ public class GameFacade {
         if (soldier.isBlue() && session.isBlue()){
             soldier.move();
         }
+    }
+
+    private void addButtons() {
+        addButton("images/barbarian.png", 600, 650, button -> this.barracks.makeDeferredBarbarian(600, 650));
+
+        addButton("images/ghost.png", 720, 650, button -> this.barracks.makeDeferredGhost(720, 650));
+
+        addButton("images/archer.png", 840, 650, button -> this.barracks.makeDeferredArcher(840, 650));
+
+        addButton("images/skeleton.png", 960, 650, button -> this.barracks.makeDeferredSkeleton(960, 650));
+    }
+
+
+    private void addButton(String url, double x, double y,  EventHandler<? super MouseEvent> onClick) {
+        ImageView button = new ImageView(url);
+        button.setX(x);
+        button.setY(y);
+        button.setFitHeight(100);
+        button.setFitWidth(100);
+        button.setOnMouseClicked(onClick);
+        group.getChildren().add(button);
     }
 
     private void checkAttack() {
