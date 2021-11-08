@@ -1,5 +1,7 @@
 package game.adapter;
 
 public interface MeleeWeapon {
-    int getMeleeDamage();
+    int getBaseMeleeDamage();
+    int getDamageFalloff();
+    int getMinimumDamage();
 }

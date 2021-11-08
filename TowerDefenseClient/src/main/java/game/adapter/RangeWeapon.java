@@ -1,5 +1,7 @@
 package game.adapter;
 
 public interface RangeWeapon {
-    int getRangeDamage();
+    int getBaseRangeDamage();
+    int getDamageIncrease();
+    int getMaximumDamage();
 }
