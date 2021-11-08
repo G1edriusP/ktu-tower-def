@@ -12,9 +12,9 @@ public class Teleport extends Movement {
         if (path == null)
             return;
 
-        path = isRed ? path.getRedPath() : path.getBluePath();
-        if (path == null)
-            return;
+        Tile next = isRed ? path.getRedPath() : path.getBluePath();
+        if (next != null)
+            path = next;
 
         soldier.setX(path.getX());
         soldier.setY(path.getY());

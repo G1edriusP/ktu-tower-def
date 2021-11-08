@@ -1,6 +1,7 @@
 package game.prototype;
 
 import game.net.Image;
+import game.singleton.ImageStore;
 import javafx.scene.image.ImageView;
 
 import java.util.UUID;
@@ -45,7 +46,31 @@ abstract public class Tile extends Image implements Cloneable {
         this.bluePath = tile;
     }
 
-    public void setObstacle(Obstacle obstacle) { this.obstacle = obstacle; }
+    public void setObstacle(Obstacle obstacle) {
+        this.obstacle = obstacle;
+        if (this instanceof SandTile) {
+            javafx.scene.image.Image image;
+            switch (obstacle) {
+                case Twigs:
+                    image = ImageStore.getInstance().getImage("tiles/sand-twigs.jpg");
+                    break;
+                default:
+                    image = ImageStore.getInstance().getImage("tiles/sand.jpg");
+            }
+            this.setImageView(new ImageView(image));
+
+        } else if (this instanceof GrassTile) {
+            javafx.scene.image.Image image;
+            switch (obstacle) {
+                case Bush:
+                    image = ImageStore.getInstance().getImage("tiles/grass-bush.jpg");
+                    break;
+                default:
+                    image = ImageStore.getInstance().getImage("tiles/grass.jpg");
+            }
+            this.setImageView(new ImageView(image));
+        }
+    }
 
     public Tile getRedPath() {
         return this.redPath;

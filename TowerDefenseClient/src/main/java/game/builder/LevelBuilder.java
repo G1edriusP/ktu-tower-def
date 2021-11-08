@@ -29,7 +29,7 @@ public class LevelBuilder {
     public LevelBuilder newGrasslands() {
         this.path = builder.newDirt().build();
         this.noWalk = builder.newGrass().build();
-        this.decor = builder.newGrass().addObstacle(Obstacle.Tree).build();
+        this.decor = builder.newGrass().addObstacle(Obstacle.Bush).build();
         return this;
     }
 
