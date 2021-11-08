@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import game.adapter.RangeWeapon;
+import game.adapter.RangeWeaponAdapter;
 import game.bridge.Weapon;
 import game.net.ISubject;
 import game.net.Session;
@@ -73,7 +74,7 @@ abstract public class Soldier extends Image {
 
     @JsonIgnore
     public Soldier getTarget() {
-        boolean isRange = this.weapon instanceof RangeWeapon;
+        boolean isRange = this.weapon instanceof RangeWeaponAdapter;
 
         Tile tile = this.tile;
         for (int i = 0; i < (isRange ? 6 : 2); i++) {
