@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import game.bridge.Weapon;
+import game.net.Session;
 import game.prototype.Tile;
 import game.strategy.Attack;
 import game.strategy.Movement;
@@ -30,20 +31,12 @@ abstract public class Soldier extends Image {
         this.health = 100;
     }
 
-    public Attack getAttack() {
-        return this.attack;
-    }
-
-    public Movement getMovement() {
-        return this.movement;
-    }
-
     public void attack(Soldier target) {
         this.attack.attack(this, target);
     }
 
-    public void move() {
-        this.movement.move(this);
+    public boolean move() {
+        return this.movement.move(this);
     }
 
     public boolean isRed() {
@@ -52,6 +45,13 @@ abstract public class Soldier extends Image {
 
     public boolean isBlue() {
         return this.getType().toUpperCase().contains("BLUE");
+    }
+
+    public boolean isOurControlled() {
+        if (Session.getInstance().isRed()) {
+            return this.isRed();
+        }
+        return this.isBlue();
     }
 
     @Override

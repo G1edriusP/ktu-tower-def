@@ -14,6 +14,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -53,14 +55,26 @@ public class GameFacade {
     }
 
     private void gameLoop() {
+        Session session = Session.getInstance();
+
         while(true) {
-            for (Map.Entry<UUID, ISubject> entry : Session.getInstance().getObjects().entrySet()) {
+            List<ISubject> toDelete = new ArrayList<>();
+
+            for (Map.Entry<UUID, ISubject> entry : session.getObjects().entrySet()) {
                 if (!(entry.getValue() instanceof Soldier)) {
                     continue;
                 }
-
                 Soldier soldier = (Soldier) entry.getValue();
-                moveSoldiers(soldier);
+                if (!soldier.isOurControlled())
+                    continue;
+
+                if (!soldier.move()) {
+                    toDelete.add(soldier);
+                }
+            }
+
+            for (ISubject subject : toDelete) {
+                subject.sendDelete();
             }
 
             try {
@@ -68,18 +82,6 @@ public class GameFacade {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private void moveSoldiers(Soldier soldier) {
-        Session session = Session.getInstance();
-
-        if (soldier.isRed() && session.isRed()){
-            soldier.move();
-        }
-
-        if (soldier.isBlue() && session.isBlue()){
-            soldier.move();
         }
     }
 

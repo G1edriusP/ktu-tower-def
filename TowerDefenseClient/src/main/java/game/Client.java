@@ -1,24 +1,17 @@
 package game;
 
-import game.builder.LevelBuilder;
-import game.entity.*;
 import game.facade.GameFacade;
-import game.factory.AbstractSoldierFactory;
-import game.level.Level;
 import game.net.ISubject;
-import javafx.application.Platform;
-import javafx.collections.MapChangeListener;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
 import game.net.Image;
 import game.net.Session;
 import javafx.application.Application;
-import javafx.scene.input.MouseEvent;
+import javafx.application.Platform;
+import javafx.collections.MapChangeListener;
+import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.util.*;
-import java.util.stream.Collectors;
+
+import java.util.UUID;
 
 public class Client extends Application {
     final Group group = new Group();
@@ -57,5 +50,4 @@ public class Client extends Application {
         stage.setScene(scene);
         stage.show();
     }
-
 }

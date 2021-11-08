@@ -88,13 +88,8 @@ public class Session extends WebSocketClient {
         System.out.println("register: " + object.getUUID());
     }
 
-    /**
-     * unregister unregisters the object.
-     *
-     * @param object Object to unregister.
-     */
-    public void unregister(ISubject object) {
-        objects.remove(object.getUUID());
+    public void unregister(UUID uuid) {
+        objects.remove(uuid);
     }
 
     @Override
@@ -118,8 +113,7 @@ public class Session extends WebSocketClient {
 
                     case "delete":
                         UUID uuid = UUID.fromString(node.get("uuid").asText());
-                        ISubject object = this.objects.get(uuid);
-                        unregister(object);
+                        unregister(uuid);
                         break;
                 }
                 return;

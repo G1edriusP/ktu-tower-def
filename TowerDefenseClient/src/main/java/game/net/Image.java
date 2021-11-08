@@ -41,7 +41,9 @@ abstract public class Image implements ISubject {
     }
 
     public void sendDelete() {
-        Session.getInstance().send("{\"action\":\"delete\",\"uuid\":\"" + this.uuid + "\"}");
+        Session session = Session.getInstance();
+        session.send("{\"action\":\"delete\",\"uuid\":\"" + this.uuid + "\"}");
+        session.unregister(getUUID());
     }
 
     public void register() {
