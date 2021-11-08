@@ -1,10 +1,13 @@
 package game.entity;
 
+import java.util.Map;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import game.adapter.RangeWeapon;
 import game.bridge.Weapon;
+import game.net.ISubject;
 import game.net.Session;
 import game.prototype.Tile;
 import game.strategy.Attack;
@@ -31,22 +34,25 @@ abstract public class Soldier extends Image {
         this.health = 100;
     }
 
-    public void attack(Soldier target) {
-        this.attack.attack(this, target);
+    public boolean attack(Soldier target) {
+        return this.attack.attack(this, target);
     }
 
     public boolean move() {
         return this.movement.move(this);
     }
 
+    @JsonIgnore
     public boolean isRed() {
         return this.getType().toUpperCase().contains("RED");
     }
 
+    @JsonIgnore
     public boolean isBlue() {
         return this.getType().toUpperCase().contains("BLUE");
     }
 
+    @JsonIgnore
     public boolean isOurControlled() {
         if (Session.getInstance().isRed()) {
             return this.isRed();
@@ -65,23 +71,64 @@ abstract public class Soldier extends Image {
         }
     }
 
+    @JsonIgnore
+    public Soldier getTarget() {
+        boolean isRange = this.weapon instanceof RangeWeapon;
+
+        Tile tile = this.tile;
+        for (int i = 0; i < (isRange ? 6 : 2); i++) {
+            tile = isRed() ? tile.getRedPath() : tile.getBluePath();
+            if (tile == null) {
+                return null;
+            }
+            Soldier target = enemyOnTile(tile);
+            if (target != null) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    private Soldier enemyOnTile(Tile tile) {
+        for (Map.Entry<UUID, ISubject> entry : Session.getInstance().getObjects().entrySet()) {
+            if (!(entry.getValue() instanceof Soldier)) {
+                continue;
+            }
+            Soldier soldier = (Soldier) entry.getValue();
+            if (soldier.isOurControlled())
+                continue;
+
+            if (soldier.getX() == tile.getX() && soldier.getY() == tile.getY()) {
+                return soldier;
+            }
+        }
+        return null;
+    }
+
     public void doDamage(int damage) {
         this.health -= damage;
     }
 
+    @JsonIgnore
     public boolean isDead() {
         return this.health <= 0;
+    }
+
+    public int getHealth() {
+        return this.health;
     }
 
     public void setTile(Tile tile) {
         this.tile = tile;
     }
 
+    @JsonIgnore
     public Tile getTile() {
         return this.tile;
     }
 
     public void setWeapon(Weapon weapon) { this.weapon = weapon; }
 
+    @JsonIgnore
     public Weapon getWeapon() { return this.weapon; };
 }

@@ -4,13 +4,12 @@ import game.entity.Soldier;
 
 public class Melee extends Attack{
     @Override
-    public void attack(Soldier attacker, Soldier target) {
+    public boolean attack(Soldier attacker, Soldier target) {
         target.doDamage(attacker.getWeapon().getDamage());
+        if (target.isDead())
+            return true;
 
-        if (target.isDead()) {
-            target.sendDelete();
-        } else {
-            target.send();
-        }
+        target.send();
+        return false;
     }
 }

@@ -45,7 +45,7 @@ public class Session extends WebSocketClient {
     private Session() throws URISyntaxException {
         super(new URI("ws://localhost:8887"));
 
-        objects = FXCollections.observableMap(new HashMap<>());
+        objects = FXCollections.synchronizedObservableMap(FXCollections.observableMap(new HashMap<>()));
         started = new SimpleBooleanProperty(false);
 
         try {

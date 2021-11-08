@@ -2,6 +2,7 @@ package game.command;
 
 import game.entity.Soldier;
 import game.factory.AbstractSoldierFactory;
+import game.singleton.ImageStore;
 import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.image.ImageView;
@@ -45,7 +46,7 @@ abstract public class SoldierCommand implements ICommand  {
     }
 
     protected void makeUndoBtn() {
-        undoBtn = new ImageView("images/wait.png");
+        undoBtn = new ImageView(ImageStore.getInstance().getImage("images/wait.png"));
         undoBtn.setX(this.x);
         undoBtn.setY(this.y);
         undoBtn.setFitHeight(100);
