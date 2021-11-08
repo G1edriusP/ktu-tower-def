@@ -31,7 +31,7 @@ public class GameFacade {
     public void gameStart(Stage stage) {
         stage.setTitle("Tower Defense | " + (Session.getInstance().isRed() ? "Red" : "Blue"));
 
-        level = new LevelBuilder().newSavannah().level1();
+        level = new LevelBuilder().newGrasslands().level3();
         soldierFactory = level.getFriendlyTower().getAbstractSoldierFactory();
 
         group.getChildren().addAll(
@@ -52,7 +52,7 @@ public class GameFacade {
 
     private void addButtons() {
         addButton("images/barbarian.png", 600, 650, button -> {
-            Barbarian barbarian = soldierFactory.createBarbarian();
+            Soldier barbarian = soldierFactory.createBarbarian();
             barbarian.register();
             barbarian.send();
         });
@@ -76,7 +76,7 @@ public class GameFacade {
         });
     }
 
-    private void addButton(String url, double x, double y,  EventHandler<? super MouseEvent> onClick) {
+    private void addButton(String url, double x, double y, EventHandler<? super MouseEvent> onClick) {
         ImageView button = new ImageView(url);
         button.setX(x);
         button.setY(y);
