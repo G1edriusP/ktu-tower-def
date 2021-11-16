@@ -77,6 +77,8 @@ abstract public class Soldier extends Image {
         boolean isRange = this.weapon instanceof RangeWeaponAdapter;
 
         Tile tile = this.tile;
+        if (tile == null)
+            return null;
         for (int i = 0; i < (isRange ? 6 : 2); i++) {
             tile = isRed() ? tile.getRedPath() : tile.getBluePath();
             if (tile == null) {

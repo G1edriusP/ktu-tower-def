@@ -108,7 +108,13 @@ public class Session extends WebSocketClient {
                     case "sessionStart":
                         this.red = node.get("red").asBoolean();
                         this.started.setValue(true);
-                        System.out.println("start");
+                        System.out.println("start " + (this.red?"red":"blue"));
+                        break;
+
+                    case "winner":
+                        this.red = node.get("red").asBoolean();
+                        this.started.setValue(false);
+                        System.out.println("stop");
                         break;
 
                     case "delete":

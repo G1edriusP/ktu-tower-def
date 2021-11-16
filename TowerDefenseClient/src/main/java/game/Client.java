@@ -34,7 +34,18 @@ public class Client extends Application {
         GameFacade gameFacade = new GameFacade();
         gameFacade.setGroup(group);
 
-        session.getStarted().addListener(observable -> Platform.runLater(() -> gameFacade.gameStart(stage)));
+        session.getStarted().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                System.out.println("listener: start");
+                gameFacade.gameStart(stage);
+            } else {
+                System.out.println("listener: stop");
+                gameFacade.displayWinner(session.isRed());
+            }
+        });
+        session.getStarted().addListener(observable -> {
+            Platform.runLater(() -> gameFacade.gameStart(stage));
+        });
 
         session.getObjects().addListener((MapChangeListener<UUID, ISubject>) change -> {
             if (change.wasAdded()) {

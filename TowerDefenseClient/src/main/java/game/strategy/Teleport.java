@@ -8,6 +8,8 @@ public class Teleport extends Movement {
     public boolean move(Soldier soldier) {
         boolean isRed = soldier.isRed();
         Tile tile = soldier.getTile();
+        if (tile == null)
+            return false;
         Tile path = isRed ? tile.getRedPath() : tile.getBluePath();
         if (path == null)
             return false;

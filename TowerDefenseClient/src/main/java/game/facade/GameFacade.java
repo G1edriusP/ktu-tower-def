@@ -9,29 +9,39 @@ import game.net.ISubject;
 import game.net.Image;
 import game.net.Session;
 import game.singleton.ImageStore;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class GameFacade {
 
+    private boolean running;
     private Group group;
     private SoldiersBarracks barracks;
+
+    public GameFacade() {
+        this.running = false;
+    }
 
     public void setGroup(Group group) {
         this.group = group;
     }
 
     public void gameStart(Stage stage) {
-        stage.setTitle("Tower Defense | " + (Session.getInstance().isRed() ? "Red" : "Blue"));
-        if (Session.getInstance().isRed()) {
+        Session session = Session.getInstance();
+
+        Level level = new LevelBuilder().newGrasslands().level3();
+        AbstractSoldierFactory soldierFactory = level.getFriendlyTower().getAbstractSoldierFactory();
+        barracks = new SoldiersBarracks(soldierFactory, group);
+
+        if (session.isRed()) {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -39,29 +49,37 @@ public class GameFacade {
             }
         }
 
-        Level level = new LevelBuilder().newGrasslands().level3();
-        AbstractSoldierFactory soldierFactory = level.getFriendlyTower().getAbstractSoldierFactory();
-        barracks = new SoldiersBarracks(soldierFactory, group);
+        boolean teamRed = session.isRed();
+        this.running = true;
+        Thread gameLoopThread = new Thread(this::gameLoop);
+        gameLoopThread.start();
 
-        group.getChildren().addAll(
+        Platform.runLater(() -> {
+            stage.setTitle("Tower Defense | " + (teamRed ? "Red" : "Blue"));
+            group.getChildren().addAll(
                 level.getTiles().stream().map(Image::getImageView).collect(Collectors.toList())
-        );
-        group.getChildren().addAll(
+            );
+            group.getChildren().addAll(
                 level.getFriendlyTower().getImageView(),
                 level.getEnemyTower().getImageView()
-        );
+            );
+            addButtons();
+        });
+    }
 
-        addButtons();
-
-        Thread gameLoopThread = new Thread(this::gameLoop);
-
-        gameLoopThread.start();
+    public void displayWinner(boolean red) {
+        if (!this.running)
+            return;
+        this.running = false;
+        String url = (red ? "images/red-won.png" : "images/blue-won.png");
+        ImageView image = new ImageView(ImageStore.getInstance().getImage(url));
+        Platform.runLater(() -> group.getChildren().add(image));
     }
 
     private void gameLoop() {
         Session session = Session.getInstance();
 
-        while(true) {
+        while(this.running) {
             List<ISubject> toDelete = new ArrayList<>();
 
             session.getObjects().forEach((uuid, subject) -> {
@@ -80,8 +98,8 @@ public class GameFacade {
                 }
 
                 if (!soldier.move()) {
-                    System.out.println((session.isRed()? "Red" :"Blue") + " won");
-                    System.exit(0);
+                    session.send("{\"action\":\"winner\",\"red\":"+(session.isRed()?"true":"false")+"}");
+                    displayWinner(session.isRed());
                 }
             });
 
@@ -97,11 +115,8 @@ public class GameFacade {
 
     private void addButtons() {
         addButton("images/barbarian.png", 600, 650, button -> this.barracks.makeDeferredBarbarian(600, 650));
-
         addButton("images/ghost.png", 720, 650, button -> this.barracks.makeDeferredGhost(720, 650));
-
         addButton("images/archer.png", 840, 650, button -> this.barracks.makeDeferredArcher(840, 650));
-
         addButton("images/skeleton.png", 960, 650, button -> this.barracks.makeDeferredSkeleton(960, 650));
     }
 
