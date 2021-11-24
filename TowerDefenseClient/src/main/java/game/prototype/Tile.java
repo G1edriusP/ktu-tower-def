@@ -1,7 +1,9 @@
 package game.prototype;
 
+import game.composite.CompositeTile;
 import game.net.Image;
 import game.singleton.ImageStore;
+import javafx.scene.Group;
 import javafx.scene.image.ImageView;
 
 import java.util.UUID;
@@ -78,5 +80,13 @@ abstract public class Tile extends Image implements Cloneable {
 
     public Tile getBluePath() {
         return this.bluePath;
+    }
+
+    public void addToGroup(Group group) {
+        group.getChildren().add(this.imageView);
+
+        if (this instanceof CompositeTile) {
+            ((CompositeTile) this).getTiles().forEach(tile -> tile.addToGroup(group));
+        }
     }
 }

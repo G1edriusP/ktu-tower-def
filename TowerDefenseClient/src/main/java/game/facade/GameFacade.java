@@ -2,12 +2,14 @@ package game.facade;
 
 import game.builder.LevelBuilder;
 import game.command.SoldiersBarracks;
+import game.composite.CompositeTile;
 import game.entity.Soldier;
 import game.factory.AbstractSoldierFactory;
 import game.level.Level;
 import game.net.ISubject;
 import game.net.Image;
 import game.net.Session;
+import game.prototype.Tile;
 import game.singleton.ImageStore;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -56,9 +58,7 @@ public class GameFacade {
 
         Platform.runLater(() -> {
             stage.setTitle("Tower Defense | " + (teamRed ? "Red" : "Blue"));
-            group.getChildren().addAll(
-                level.getTiles().stream().map(Image::getImageView).collect(Collectors.toList())
-            );
+            level.getTiles().forEach(tile -> tile.addToGroup(group));
             group.getChildren().addAll(
                 level.getFriendlyTower().getImageView(),
                 level.getEnemyTower().getImageView()

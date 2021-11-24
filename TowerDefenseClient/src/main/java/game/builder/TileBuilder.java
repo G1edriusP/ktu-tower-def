@@ -1,31 +1,37 @@
 package game.builder;
 
+import game.composite.*;
 import game.prototype.*;
 
 public class TileBuilder {
-    protected Tile tile;
+    protected CompositeTile tile;
 
     public TileBuilder newGrass() {
-        this.tile = new GrassTile();
+        this.tile = new CompositeTile(new GrassTile());
         return this;
     }
 
     public TileBuilder newDirt() {
-        this.tile = new DirtTile();
+        this.tile = new CompositeTile(new DirtTile());
         return this;
     }
 
     public TileBuilder newSand() {
-        this.tile = new SandTile();
+        this.tile = new CompositeTile(new SandTile());
         return this;
     }
 
-    public TileBuilder addObstacle(Obstacle obstacle) {
-        this.tile.setObstacle(obstacle);
+    public TileBuilder addObstacle() {
+        boolean random = this.tile.getUUID().getMostSignificantBits() % 2 == 0;
+        switch (this.tile.getType()) {
+            case "grass-tile" -> this.tile.addTile(random ? new BushTile() : new PuddleTile());
+            case "sand-tile" -> this.tile.addTile(random ? new CactusTile() : new TwigsTile());
+            default -> this.tile.addTile(new TwigsTile());
+        }
         return this;
     }
 
-    public Tile build() {
+    public CompositeTile build() {
         return this.tile;
     }
 }

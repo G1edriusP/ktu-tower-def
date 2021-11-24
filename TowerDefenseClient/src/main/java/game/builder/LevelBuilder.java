@@ -1,5 +1,7 @@
 package game.builder;
 
+import game.composite.BushTile;
+import game.composite.CompositeTile;
 import game.entity.Tower;
 import game.factory.Creator;
 import game.factory.TowerCreator;
@@ -13,23 +15,23 @@ import java.net.URISyntaxException;
 public class LevelBuilder {
     private TileBuilder builder = new TileBuilder();
 
-    private Tile path;   // 1
-    private Tile noWalk; // 0
-    private Tile decor;  // 2
+    private CompositeTile path;   // 1
+    private CompositeTile noWalk; // 0
+    private CompositeTile decor;  // 2
     // 3 - red tower
     // 4 - blue tower
 
     public LevelBuilder newSavannah() {
         this.path = builder.newDirt().build();
         this.noWalk = builder.newSand().build();
-        this.decor = builder.newSand().addObstacle(Obstacle.Twigs).build();
+        this.decor = builder.newSand().addObstacle().build();
         return this;
     }
 
     public LevelBuilder newGrasslands() {
         this.path = builder.newDirt().build();
         this.noWalk = builder.newGrass().build();
-        this.decor = builder.newGrass().addObstacle(Obstacle.Bush).build();
+        this.decor = builder.newGrass().addObstacle().build();
         return this;
     }
 
@@ -145,7 +147,7 @@ public class LevelBuilder {
                     tile = this.path.copyDeep();
                     break;
                 case 2:
-                    tile = this.decor.copyDeep();
+                    tile = builder.newGrass().addObstacle().build();
                     break;
                 case 3, 4:
                     tile = this.path.copyDeep();
