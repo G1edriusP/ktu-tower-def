@@ -2,6 +2,8 @@ package game.command;
 
 import game.entity.Soldier;
 import game.factory.AbstractSoldierFactory;
+import game.net.ISubject;
+import game.proxy.SubjectProxy;
 import game.singleton.ImageStore;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -60,9 +62,9 @@ abstract public class SoldierCommand implements ICommand  {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Soldier soldier = makeSoldier();
-                soldier.register();
-                soldier.send();
+                ISubject subject = new SubjectProxy(makeSoldier());
+                subject.register();
+                subject.send();
                 Platform.runLater(() -> group.getChildren().remove(undoBtn));
             }
         }, this.timeToSpawn);
