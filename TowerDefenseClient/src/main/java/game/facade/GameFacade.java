@@ -1,26 +1,20 @@
 package game.facade;
 
 import game.builder.LevelBuilder;
+import game.chain.ArmyManager;
+import game.chain.requests.RemoveSubjectRequest;
 import game.command.SoldiersBarracks;
-import game.composite.CompositeTile;
 import game.entity.Soldier;
 import game.factory.AbstractSoldierFactory;
 import game.level.Level;
-import game.net.ISubject;
-import game.net.Image;
 import game.net.Session;
-import game.prototype.Tile;
 import game.singleton.ImageStore;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class GameFacade {
 
@@ -43,21 +37,12 @@ public class GameFacade {
         AbstractSoldierFactory soldierFactory = level.getFriendlyTower().getAbstractSoldierFactory();
         barracks = new SoldiersBarracks(soldierFactory, group);
 
-        if (session.isRed()) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        boolean teamRed = session.isRed();
         this.running = true;
         Thread gameLoopThread = new Thread(this::gameLoop);
         gameLoopThread.start();
 
         Platform.runLater(() -> {
-            stage.setTitle("Tower Defense | " + (teamRed ? "Red" : "Blue"));
+            stage.setTitle("Tower Defense | " + (session.isRed() ? "Red" : "Blue"));
             level.getTiles().forEach(tile -> tile.addToGroup(group));
             group.getChildren().addAll(
                 level.getFriendlyTower().getImageView(),
@@ -77,12 +62,15 @@ public class GameFacade {
     }
 
     private void gameLoop() {
+        ArmyManager armyManager = ArmyManager.getInstance();
         Session session = Session.getInstance();
 
-        while(this.running) {
-            List<ISubject> toDelete = new ArrayList<>();
-
+        while (this.running) {
+            armyManager.lock();
             session.getObjects().forEach((uuid, subject) -> {
+                if (!this.running)
+                    return;
+
                 if (!(subject instanceof Soldier soldier))
                     return;
 
@@ -93,17 +81,22 @@ public class GameFacade {
                 if (target != null) {
                     boolean killed = soldier.attack(target);
                     if (killed)
-                        toDelete.add(target);
+                        armyManager.add(new RemoveSubjectRequest(target));
                     return;
                 }
 
-                if (!soldier.move()) {
+                boolean moved = soldier.move();
+                if (!moved) {
+                    // We got to the end
                     session.send("{\"action\":\"winner\",\"red\":"+(session.isRed()?"true":"false")+"}");
                     displayWinner(session.isRed());
                 }
             });
+            armyManager.unlock();
+            armyManager.handle();
 
-            toDelete.forEach(ISubject::sendDelete);
+            if (!this.running)
+                return;
 
             try {
                 Thread.sleep(1500);

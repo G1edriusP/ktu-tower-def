@@ -6,6 +6,9 @@ import java.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import game.chain.ArmyManager;
+import game.chain.requests.AddSubjectRequest;
+import game.chain.requests.RemoveSubjectRequest;
 import game.entity.blue.*;
 import game.entity.red.*;
 import game.prototype.DirtTile;
@@ -45,7 +48,7 @@ public class Session extends WebSocketClient {
     private Session() throws URISyntaxException {
         super(new URI("ws://localhost:8887"));
 
-        objects = FXCollections.synchronizedObservableMap(FXCollections.observableMap(new HashMap<>()));
+        objects = FXCollections.observableMap(new HashMap<>());
         started = new SimpleBooleanProperty(false);
 
         try {
@@ -79,17 +82,17 @@ public class Session extends WebSocketClient {
      *
      * @param object Object to register.
      */
-    public void register(ISubject object)  {
-        if (objects.containsKey(object.getUUID())) {
-            System.out.println("trying to register existing: " + object.getUUID());
-            return;
-        }
-        objects.put(object.getUUID(), object);
+    public void register(ISubject object) {
         System.out.println("register: " + object.getUUID());
+        ArmyManager armyManager = ArmyManager.getInstance();
+        armyManager.add(new AddSubjectRequest(object));
+        armyManager.handle();
     }
 
     public void unregister(UUID uuid) {
-        objects.remove(uuid);
+        ArmyManager armyManager = ArmyManager.getInstance();
+        armyManager.add(new RemoveSubjectRequest(uuid));
+        armyManager.handle();
     }
 
     @Override
@@ -131,7 +134,18 @@ public class Session extends WebSocketClient {
             UUID uuid = UUID.fromString(node.get("uuid").asText());
 
             synchronized (this) {
-                ISubject object = this.objects.get(uuid);
+                ISubject object;
+                ArmyManager armyManager = ArmyManager.getInstance();
+
+                armyManager.lock();
+                try {
+                    object = this.objects.get(uuid);
+                } catch (Exception e) {
+                    throw e;
+                } finally {
+                    armyManager.unlock();
+                }
+
                 if (object != null) {
                     // Update the object
                     object.receive(message);

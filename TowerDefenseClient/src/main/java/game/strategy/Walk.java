@@ -1,5 +1,7 @@
 package game.strategy;
 
+import game.chain.ArmyManager;
+import game.chain.requests.MoveSoldierRequest;
 import game.entity.Soldier;
 import game.prototype.Tile;
 
@@ -14,11 +16,7 @@ public class Walk extends Movement {
         if (path == null)
             return false;
 
-        soldier.setX(path.getX());
-        soldier.setY(path.getY());
-        soldier.setTile(path);
-
-        soldier.send();
+        ArmyManager.getInstance().add(new MoveSoldierRequest(soldier, path));
         return true;
     }
 }
