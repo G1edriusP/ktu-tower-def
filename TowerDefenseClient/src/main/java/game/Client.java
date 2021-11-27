@@ -43,9 +43,6 @@ public class Client extends Application {
                 gameFacade.displayWinner(session.isRed());
             }
         });
-        session.getStarted().addListener(observable -> {
-            Platform.runLater(() -> gameFacade.gameStart(stage));
-        });
 
         session.getObjects().addListener((MapChangeListener<UUID, ISubject>) change -> {
             if (change.wasAdded()) {
