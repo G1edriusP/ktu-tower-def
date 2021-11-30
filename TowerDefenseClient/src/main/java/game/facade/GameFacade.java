@@ -9,6 +9,10 @@ import game.factory.AbstractSoldierFactory;
 import game.level.Level;
 import game.net.Session;
 import game.singleton.ImageStore;
+import game.state.MoveState;
+import game.state.SearchState;
+import game.state.State;
+import game.state.VictoryState;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -77,19 +81,14 @@ public class GameFacade {
                 if (!soldier.isOurControlled())
                     return;
 
-                Soldier target = soldier.getTarget();
-                if (target != null) {
-                    boolean killed = soldier.attack(target);
-                    if (killed)
-                        armyManager.add(new RemoveSubjectRequest(target));
-                    return;
-                }
+                State nextState = new SearchState();
 
-                boolean moved = soldier.move();
-                if (!moved) {
-                    // We got to the end
-                    session.send("{\"action\":\"winner\",\"red\":"+(session.isRed()?"true":"false")+"}");
-                    displayWinner(session.isRed());
+                while (nextState != null) {
+                    if (nextState instanceof VictoryState) {
+                        displayWinner(session.isRed());
+                    }
+                    soldier.setState(nextState);
+                    nextState = soldier.operate();
                 }
             });
             armyManager.unlock();
@@ -105,6 +104,51 @@ public class GameFacade {
             }
         }
     }
+
+//    private void gameLoop() {
+//        ArmyManager armyManager = ArmyManager.getInstance();
+//        Session session = Session.getInstance();
+//
+//        while (this.running) {
+//            armyManager.lock();
+//            session.getObjects().forEach((uuid, subject) -> {
+//                if (!this.running)
+//                    return;
+//
+//                if (!(subject instanceof Soldier soldier))
+//                    return;
+//
+//                if (!soldier.isOurControlled())
+//                    return;
+//
+//                Soldier target = soldier.getTarget();
+//                if (target != null) {
+//                    boolean killed = soldier.attack(target);
+//                    if (killed)
+//                        armyManager.add(new RemoveSubjectRequest(target));
+//                    return;
+//                }
+//
+//                boolean moved = soldier.move();
+//                if (!moved) {
+//                    // We got to the end
+//                    session.send("{\"action\":\"winner\",\"red\":"+(session.isRed()?"true":"false")+"}");
+//                    displayWinner(session.isRed());
+//                }
+//            });
+//            armyManager.unlock();
+//            armyManager.handle();
+//
+//            if (!this.running)
+//                return;
+//
+//            try {
+//                Thread.sleep(1500);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     private void addButtons() {
         addButton("images/barbarian.png", 600, 650, button -> this.barracks.makeDeferredBarbarian(600, 650));

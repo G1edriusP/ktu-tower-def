@@ -8,9 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import game.adapter.RangeWeapon;
 import game.adapter.RangeWeaponAdapter;
 import game.bridge.Weapon;
+import game.chain.ArmyManager;
+import game.chain.requests.RemoveSubjectRequest;
 import game.net.ISubject;
 import game.net.Session;
 import game.prototype.Tile;
+import game.state.*;
 import game.strategy.Attack;
 import game.strategy.Movement;
 import javafx.scene.image.ImageView;
@@ -25,6 +28,9 @@ abstract public class Soldier extends Image {
     protected Tile tile;
     @JsonIgnore
     protected Weapon weapon;
+
+    @JsonIgnore
+    protected State currentState;
 
     protected int health;
 
@@ -134,4 +140,14 @@ abstract public class Soldier extends Image {
 
     @JsonIgnore
     public Weapon getWeapon() { return this.weapon; };
+
+    @JsonIgnore
+    public void setState(State state) { this.currentState = state; };
+
+    @JsonIgnore
+    public State getState() { return this.currentState; };
+
+    public State operate() {
+        return this.currentState.doOperation(this);
+    }
 }
