@@ -6,6 +6,7 @@ import game.chain.requests.RemoveSubjectRequest;
 import game.command.SoldiersBarracks;
 import game.entity.Soldier;
 import game.factory.AbstractSoldierFactory;
+import game.iterator.ControlledSoldiersIterator;
 import game.level.Level;
 import game.net.Session;
 import game.singleton.ImageStore;
@@ -71,15 +72,11 @@ public class GameFacade {
 
         while (this.running) {
             armyManager.lock();
-            session.getObjects().forEach((uuid, subject) -> {
+            ControlledSoldiersIterator soldiers = new ControlledSoldiersIterator(session);
+
+            for (Soldier soldier : soldiers) {
                 if (!this.running)
-                    return;
-
-                if (!(subject instanceof Soldier soldier))
-                    return;
-
-                if (!soldier.isOurControlled())
-                    return;
+                    break;
 
                 State nextState = new SearchState();
 
@@ -90,7 +87,8 @@ public class GameFacade {
                     soldier.setState(nextState);
                     nextState = soldier.operate();
                 }
-            });
+            }
+
             armyManager.unlock();
             armyManager.handle();
 
