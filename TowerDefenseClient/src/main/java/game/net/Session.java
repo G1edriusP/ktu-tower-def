@@ -11,12 +11,12 @@ import game.chain.requests.AddSubjectRequest;
 import game.chain.requests.RemoveSubjectRequest;
 import game.entity.blue.*;
 import game.entity.red.*;
+import game.interpreter.*;
 import game.prototype.DirtTile;
 import game.prototype.GrassTile;
 import game.prototype.SandTile;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import org.java_websocket.client.WebSocketClient;
@@ -104,35 +104,20 @@ public class Session extends WebSocketClient {
     public void onMessage(String message)  {
         // Try extracting UUID from the message.
         try {
-            ObjectNode node = new ObjectMapper().readValue(message, ObjectNode.class);
+            ObjectNode node = new ObjectMapper().
+                    readValue(message, ObjectNode.class);
 
-            if (node.has("action")) {
-                switch (node.get("action").asText("")) {
-                    case "sessionStart":
-                        this.red = node.get("red").asBoolean();
-                        this.started.setValue(true);
-                        System.out.println("start " + (this.red?"red":"blue"));
-                        break;
-
-                    case "winner":
-                        this.red = node.get("red").asBoolean();
-                        this.started.setValue(false);
-                        System.out.println("stop");
-                        break;
-
-                    case "delete":
-                        UUID uuid = UUID.fromString(node.get("uuid").asText());
-                        unregister(uuid);
-                        break;
-                }
+            Expression expr = Parser.parseNode(node);
+            if (expr == null) {
                 return;
             }
 
-            if (!node.has("uuid")) {
+            if (!(expr instanceof UUIDExpression)) {
+                System.out.println(expr.execute());
                 return;
             }
-            UUID uuid = UUID.fromString(node.get("uuid").asText());
 
+            UUID uuid = UUID.fromString(expr.execute());
             synchronized (this) {
                 ISubject object;
                 ArmyManager armyManager = ArmyManager.getInstance();
@@ -186,16 +171,6 @@ public class Session extends WebSocketClient {
                         object = new RedTower(uuid);
                         break;
 
-                    case "grass-tile":
-                        object = new GrassTile(uuid);
-                        break;
-                    case "dirt-tile":
-                        object = new DirtTile(uuid);
-                        break;
-                    case "sand-tile":
-                        object = new SandTile(uuid);
-                        break;
-
                     default:
                         System.out.println("unregistered unknown object: " +
                                 uuid);
@@ -204,7 +179,9 @@ public class Session extends WebSocketClient {
                 object.receive(message);
                 object.register();
             }
+
         } catch (JsonProcessingException e) {
+            System.out.println("exception on msg: "+ message);
             e.printStackTrace();
         }
     }
@@ -221,7 +198,11 @@ public class Session extends WebSocketClient {
         // System.exit(1);
     }
 
-    public ObservableBooleanValue getStarted() {
+    public void setTeam(boolean red) {
+        this.red = red;
+    }
+
+    public BooleanProperty getStarted() {
         return this.started;
     }
 }

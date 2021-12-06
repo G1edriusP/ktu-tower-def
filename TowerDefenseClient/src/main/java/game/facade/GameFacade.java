@@ -79,7 +79,6 @@ public class GameFacade {
                     break;
 
                 State nextState = new SearchState();
-
                 while (nextState != null) {
                     if (nextState instanceof VictoryState) {
                         displayWinner(session.isRed());

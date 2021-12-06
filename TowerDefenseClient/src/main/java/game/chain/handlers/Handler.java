@@ -16,6 +16,4 @@ public abstract class Handler {
         this.next = next;
         return next;
     }
-
-
 }
