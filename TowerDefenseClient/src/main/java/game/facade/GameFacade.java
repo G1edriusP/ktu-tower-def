@@ -14,6 +14,7 @@ import game.state.MoveState;
 import game.state.SearchState;
 import game.state.State;
 import game.state.VictoryState;
+import game.template.SavannahLevel;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -38,7 +39,7 @@ public class GameFacade {
     public void gameStart(Stage stage) {
         Session session = Session.getInstance();
 
-        Level level = new LevelBuilder().newGrasslands().level3();
+        Level level = new SavannahLevel().build();
         AbstractSoldierFactory soldierFactory = level.getFriendlyTower().getAbstractSoldierFactory();
         barracks = new SoldiersBarracks(soldierFactory, group);
 

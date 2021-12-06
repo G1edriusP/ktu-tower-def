@@ -24,9 +24,15 @@ public class TileBuilder {
     public TileBuilder addObstacle() {
         boolean random = this.tile.getUUID().getMostSignificantBits() % 2 == 0;
         switch (this.tile.getType()) {
-            case "grass-tile" -> this.tile.addTile(random ? new BushTile() : new PuddleTile());
-            case "sand-tile" -> this.tile.addTile(random ? new CactusTile() : new TwigsTile());
-            default -> this.tile.addTile(new TwigsTile());
+            case "grass-tile":
+                this.tile.addTile(random ? new BushTile() : new PuddleTile());
+                break;
+            case "sand-tile":
+                this.tile.addTile(random ? new CactusTile() : new TwigsTile());
+                break;
+            default:
+                this.tile.addTile(new TwigsTile());
+                break;
         }
         return this;
     }

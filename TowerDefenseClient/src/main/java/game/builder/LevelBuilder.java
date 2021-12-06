@@ -12,44 +12,19 @@ import game.prototype.Tile;
 
 import java.net.URISyntaxException;
 
-public class LevelBuilder {
-    private TileBuilder builder = new TileBuilder();
+abstract public class LevelBuilder {
+    protected TileBuilder builder = new TileBuilder();
 
-    private CompositeTile path;   // 1
-    private CompositeTile noWalk; // 0
-    private CompositeTile decor;  // 2
+    protected CompositeTile path;   // 1
+    protected CompositeTile noWalk; // 0
+    protected CompositeTile decor;  // 2
     // 3 - red tower
     // 4 - blue tower
 
-    public LevelBuilder newSavannah() {
-        this.path = builder.newDirt().build();
-        this.noWalk = builder.newSand().build();
-        this.decor = builder.newSand().addObstacle().build();
-        return this;
-    }
+    abstract public int[][] level();
 
-    public LevelBuilder newGrasslands() {
-        this.path = builder.newDirt().build();
-        this.noWalk = builder.newGrass().build();
-        this.decor = builder.newGrass().addObstacle().build();
-        return this;
-    }
-
-    public Level level1() {
-        int[][] map = {
-            {0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 4, 0},
-            {0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 2, 0, 0, 0},
-            {0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-            {0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
-            {0, 0, 0, 2, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 2, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0},
-            {0, 3, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0},
-            {0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-        };
+    public Level build() {
+        int[][] map = level();
         Level level = null;
         try {
             level = make(map);
@@ -59,79 +34,7 @@ public class LevelBuilder {
         return level;
     }
 
-    public Level level2() {
-        int[][] map = {
-                {0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 3, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0},
-                {0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0},
-                {0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 0, 0, 1, 0},
-                {0, 1, 0, 1, 2, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0},
-                {0, 1, 0, 1, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 1, 0},
-                {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0},
-                {0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0},
-                {0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 2},
-                {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 4, 0},
-                {0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        };
-        Level level = null;
-        try {
-            level = make(map);
-        } catch (URISyntaxException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return level;
-    }
-
-    public Level level3() {
-        int[][] map = {
-                {0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0},
-                {0, 1, 1, 1, 1, 1, 3, 0, 0, 4, 1, 1, 1, 1, 1, 1, 1, 0},
-                {0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0},
-                {0, 1, 2, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0},
-                {0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 2, 1, 0},
-                {0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 2},
-                {0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0},
-                {0, 1, 1, 1, 0, 1, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 2, 0, 0, 2, 0, 0},
-                {0, 0, 0, 0, 2, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 2, 0, 0, 0, 1, 1, 1, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-        };
-        Level level = null;
-        try {
-            level = make(map);
-        } catch (URISyntaxException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return level;
-    }
-
-    public Level levelTesting() {
-        int[][] map = {
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        };
-        Level level = null;
-        try {
-            level = make(map);
-        } catch (URISyntaxException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return level;
-    }
-
-    private Level make(int[][] map) throws URISyntaxException, InterruptedException {
+    protected Level make(int[][] map) throws URISyntaxException, InterruptedException {
         Creator creator = new TowerCreator();
         Level level = new Level();
         double x = 0;
@@ -147,7 +50,11 @@ public class LevelBuilder {
                     tile = this.path.copyDeep();
                     break;
                 case 2:
-                    tile = builder.newGrass().addObstacle().build();
+                    if (this.noWalk.getType().equals("sand-tile")) {
+                        tile = builder.newSand().addObstacle().build();
+                    } else {
+                        tile = builder.newGrass().addObstacle().build();
+                    }
                     break;
                 case 3, 4:
                     tile = this.path.copyDeep();
