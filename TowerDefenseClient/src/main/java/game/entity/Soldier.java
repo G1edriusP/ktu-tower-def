@@ -16,6 +16,8 @@ import game.prototype.Tile;
 import game.state.*;
 import game.strategy.Attack;
 import game.strategy.Movement;
+import game.visitor.SingleVisitor;
+import game.visitor.Visitor;
 import javafx.scene.image.ImageView;
 import game.net.Image;
 
@@ -81,12 +83,13 @@ abstract public class Soldier extends Image {
     @JsonIgnore
     public Soldier getTarget() {
         boolean isRange = this.weapon instanceof RangeWeaponAdapter;
+        Visitor visitor = new SingleVisitor();
 
         Tile tile = this.tile;
         if (tile == null)
             return null;
         for (int i = 0; i < (isRange ? 6 : 2); i++) {
-            tile = isRed() ? tile.getRedPath() : tile.getBluePath();
+            tile = visitor.visit(tile, isRed());
             if (tile == null) {
                 return null;
             }
