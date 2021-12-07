@@ -2,7 +2,7 @@ package game.visitor;
 
 import game.prototype.Tile;
 
-public class TeleportVisitor extends Visitor {
+public class TeleportVisitor implements Visitor {
     @Override
     public Tile visit(Tile start, boolean isRed) {
         if (start == null)

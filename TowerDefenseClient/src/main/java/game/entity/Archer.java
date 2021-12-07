@@ -14,6 +14,6 @@ abstract public class Archer extends Soldier {
         this.movement = new Walk();
         this.attack = new Range();
         this.health = 80;
-        this.weapon = new RangeWeaponAdapter(new Bow());
+        this.setWeaponOriginator(new RangeWeaponAdapter(new Bow()));
     }
 }

@@ -2,8 +2,6 @@ package game.interpreter;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.Objects;
-
 public class Parser {
     public static Expression parseNode(ObjectNode node) {
         try{
@@ -11,7 +9,7 @@ public class Parser {
                 String type = node.get("action").asText("");
                 String arg;
 
-                if (Objects.equals(type, "delete")) {
+                if (type.equals("delete")) {
                     arg = node.get("uuid").asText();
                 } else {
                     arg = node.get("red").asBoolean()? "red" : "blue";

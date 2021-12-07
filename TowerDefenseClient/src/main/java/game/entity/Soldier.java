@@ -5,11 +5,11 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import game.adapter.RangeWeapon;
+import game.adapter.AdaptiveWeapon;
 import game.adapter.RangeWeaponAdapter;
 import game.bridge.Weapon;
-import game.chain.ArmyManager;
-import game.chain.requests.RemoveSubjectRequest;
+import game.memento.WeaponMemento;
+import game.memento.WeaponOriginator;
 import game.net.ISubject;
 import game.net.Session;
 import game.prototype.Tile;
@@ -29,8 +29,9 @@ abstract public class Soldier extends Image {
     @JsonIgnore
     protected Tile tile;
     @JsonIgnore
-    protected Weapon weapon;
-
+    protected WeaponOriginator weaponOriginator;
+    @JsonIgnore
+    protected WeaponMemento weaponStartingState;
     @JsonIgnore
     protected State currentState;
 
@@ -82,7 +83,7 @@ abstract public class Soldier extends Image {
 
     @JsonIgnore
     public Soldier getTarget() {
-        boolean isRange = this.weapon instanceof RangeWeaponAdapter;
+        boolean isRange = this.weaponOriginator.getWeapon() instanceof RangeWeaponAdapter;
         Visitor visitor = new SingleVisitor();
 
         Tile tile = this.tile;
@@ -118,6 +119,7 @@ abstract public class Soldier extends Image {
     }
 
     public void doDamage(int damage) {
+        this.weaponOriginator.restore(this.weaponStartingState);
         this.health -= damage;
     }
 
@@ -139,10 +141,13 @@ abstract public class Soldier extends Image {
         return this.tile;
     }
 
-    public void setWeapon(Weapon weapon) { this.weapon = weapon; }
+    public void setWeaponOriginator(AdaptiveWeapon weaponOriginator) {
+        this.weaponOriginator = new WeaponOriginator(weaponOriginator);
+        this.weaponStartingState = this.weaponOriginator.createMemento();
+    }
 
     @JsonIgnore
-    public Weapon getWeapon() { return this.weapon; };
+    public Weapon getWeaponOriginator() { return this.weaponOriginator.getWeapon(); };
 
     @JsonIgnore
     public void setState(State state) { this.currentState = state; };

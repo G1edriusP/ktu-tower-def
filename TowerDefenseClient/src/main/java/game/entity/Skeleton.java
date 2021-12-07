@@ -14,6 +14,6 @@ abstract public class Skeleton extends Soldier {
         this.movement = new Teleport();
         this.attack = new Melee();
         this.health = 70;
-        this.weapon = new MeleeWeaponAdapter(new Bone());
+        this.setWeaponOriginator(new MeleeWeaponAdapter(new Bone()));
     }
 }

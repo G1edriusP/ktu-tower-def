@@ -1,22 +1,21 @@
 package game.adapter;
 
-import game.bridge.Weapon;
+import game.memento.WeaponMemento;
 
-public class MeleeWeaponAdapter extends Weapon {
-    private int usesCount;
+public class MeleeWeaponAdapter extends AdaptiveWeapon {
     private MeleeWeapon weapon;
 
     public MeleeWeaponAdapter(MeleeWeapon weapon) {
-        this.usesCount = 0;
+        super();
         this.weapon = weapon;
     }
 
     @Override
     public int getDamage() {
-        int damage = weapon.getBaseMeleeDamage() - weapon.getDamageFalloff()*usesCount;
+        int damage = weapon.getBaseMeleeDamage() - weapon.getDamageFalloff()*this.usesCount;
         if (damage < weapon.getMinimumDamage())
             damage = weapon.getMinimumDamage();
-        usesCount++;
+        this.usesCount++;
         return damage;
     }
 }

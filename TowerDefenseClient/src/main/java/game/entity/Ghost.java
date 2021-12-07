@@ -1,8 +1,6 @@
 package game.entity;
 
 import game.adapter.RangeWeaponAdapter;
-import game.bridge.Bow;
-import game.bridge.Mace;
 import game.bridge.SpiritOrb;
 import game.strategy.Range;
 import game.strategy.Teleport;
@@ -15,6 +13,6 @@ abstract public class Ghost extends Soldier {
         this.movement = new Teleport();
         this.attack = new Range();
         this.health = 130;
-        this.weapon = new RangeWeaponAdapter(new SpiritOrb());
+        this.setWeaponOriginator(new RangeWeaponAdapter(new SpiritOrb()));
     }
 }

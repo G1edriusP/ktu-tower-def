@@ -2,7 +2,7 @@ package game.adapter;
 
 import game.bridge.Weapon;
 
-public class RangeWeaponAdapter extends Weapon {
+public class RangeWeaponAdapter extends AdaptiveWeapon {
     private int usesCount;
     private RangeWeapon weapon;
 

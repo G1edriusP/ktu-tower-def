@@ -5,7 +5,7 @@ import game.entity.Soldier;
 public class Range extends Attack{
     @Override
     public boolean attack(Soldier attacker, Soldier target) {
-        target.doDamage(attacker.getWeapon().getDamage());
+        target.doDamage(attacker.getWeaponOriginator().getDamage());
         if (target.isDead())
             return true;
 

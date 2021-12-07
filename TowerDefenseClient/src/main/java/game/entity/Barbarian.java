@@ -13,6 +13,6 @@ abstract public class Barbarian extends Soldier {
         this.movement = new Walk();
         this.attack = new Melee();
         this.health = 150;
-        this.weapon = new MeleeWeaponAdapter(new Mace());
+        this.setWeaponOriginator(new MeleeWeaponAdapter(new Mace()));
     }
 }
